@@ -18,28 +18,31 @@ function Base.show(io::IO, term::Term)
 end
 
 function _print(io::IO, term::Term, args...; kwargs...)
+    return print(io, _print(term, args...; kwargs...))
+end
+
+function _print(term::Term, args...; kwargs...)
     s = (length(term.name) == 0) ? "(unnamed term)" : "“$(term.name)” (term)"
-    (length(term.properties)) == 0 && return print(io, s)
+    (length(term.properties)) == 0 && return s
     for k in keys(term.properties)
-        v = replace(_print(term, k, args...; kwargs...), '\n' => "\n\t")
+        v = replace(_print(term.properties[k], args...; kwargs...), '\n' => "\n\t")
         s *= "\n  - :$(k)\t$(v)"
     end
-    return print(io, s)
+    return s
 end
 
 function _print(term::Term, key::Symbol, args...; default = "", kwargs...)
     !haskey(term.properties, key) && return default
-    return __print(term.properties[key], args...; kwargs...)
+    return _print(term.properties[key], args...; kwargs...)
 end
 
-__print(v::String, args...; kwargs...) = v
-function __print(v::Function, args...; kwargs...)
+_print(v::String, args...; kwargs...) = v
+function _print(v::Function, args...; kwargs...)
     # estimate from first function method
     m = methods(v)[1]
     (m.nargs != (length(args) + 1)) && return "$(v)"
     return v(args...; kwargs...)
 end
-__print(v::GlossarEntry, args...; kwargs...) = _print(v, args...; kwargs...)
 
 """
     add!(term::Term{P}, name::Symbol, value::Q) where {P, Q<:P}
@@ -51,12 +54,6 @@ function add!(term::Term{P}, name::Symbol, value::Q) where {P, Q <: P}
     return term
 end
 
-function Glossary()
-    glossary = Glossary(Dict{Symbol, GlossarEntry}())
-    current_glossary!(glossary)
-    return glossary
-end
-
 function Base.show(io::IO, glossary::Glossary)
     return _print(io, glossary)
 end
@@ -65,8 +62,22 @@ function _print(io, glossary::Glossary)
     length(glossary.terms) == 0 && return print(io, "An Empty Glossary")
     s = "Glossary with $(length(glossary.terms)) terms:"
     for (k, v) in glossary.terms
-        v = replace(repr(v), '\n' => "\n\t")
-        s *= "\n* :$(k)\t$(v)"
+        if v === glossary # recursion!
+            s *= "\n* :$(k)\t(Glossary - recursive reference)"
+        else
+            v = replace(repr(v), '\n' => "\n\t")
+            s *= "\n* :$(k)\t$(v)"
+        end
+    end
+    return print(io, s)
+end
+
+function _print(glossary::Glossary, args...; kwargs...)
+    length(glossary.terms) == 0 && return "An Empty Glossary"
+    s = "Glossary with $(length(glossary.terms)) terms:"
+    for (k, v) in glossary.terms
+        w = replace(_print(v, args...; kwargs...), '\n' => "\n\t")
+        s *= "\n* :$(k)\t$(w)"
     end
     return print(io, s)
 end
