@@ -17,23 +17,28 @@ function Base.show(io::IO, term::Term)
     return _print(io, term)
 end
 
-function _print(io::IO, term::Term; kwargs...)
-    s = "“$(term.name)” (term)"
+function _print(io::IO, term::Term, args...; kwargs...)
+    s = (length(term.name) == 0) ? "(unnamed term)" : "“$(term.name)” (term)"
     (length(term.properties)) == 0 && return print(io, s)
     for k in keys(term.properties)
-        s *= "\n  - :$(k)\t$(_print(term, k; kwargs...))"
+        s *= "\n  - :$(k)\t$(_print(term, k, args...; kwargs...))"
     end
     return print(io, s)
 end
 
-function _print(term::Term, key::Symbol; default = "", kwargs...)
+function _print(term::Term, key::Symbol, args...; default = "", kwargs...)
     !haskey(term.properties, key) && return default
-    return __print(term.properties[key]; kwargs...)
+    return __print(term.properties[key], args...; kwargs...)
 end
 
-__print(v::String; kwargs...) = v
-__print(v::Function; kwargs...) = v(; kwargs...)
-__print(v::GlossaryTerm; kwargs...) = _print(v; kwargs...)
+__print(v::String, args...; kwargs...) = v
+function __print(v::Function, args...; kwargs...)
+    # estimate from first function method
+    m = methods(v)[1]
+    (m.nargs != (length(args) + 1)) && return "$(v)"
+    return v(args...; kwargs...)
+end
+__print(v::GlossaryTerm, args...; kwargs...) = _print(v, args...; kwargs...)
 
 """
     add!(term::Term{P}, name::Symbol, value::Q) where {P, Q<:P}
@@ -73,10 +78,10 @@ If no `glossary` is given, the current active glossary (or the last created glos
 """
 
 @doc "$(_doc_define_entry)"
-define!(glossary::Glossary, entry::Symbol, name::String) = define!(glossary, entry, Term(name))
+define!(glossary::Glossary, entry::Symbol, name::String = "") = define!(glossary, entry, Term(name))
 
 @doc "$(_doc_define_entry)"
-function define!(entry::Symbol, name::String)
+function define!(entry::Symbol, name::String = "")
     glossary = current_glossary()
     if isnothing(glossary)
         glossary = Glossary()
@@ -109,13 +114,16 @@ _doc_define_prop = """
     define!(glossary::Glossary, entry::Symbol, property::Symbol, args...)
 
 Define a property `property` with value `args...` for the [`Term`](@ref) at `entry` in [`Glossary`](@ref) `glossary`.
-
+If the term does not exist yet, it is created as an empty [`Term`](@ref)`()`.
 If no `glossary` is given, the current active glossary (or the last created glossary) is used. If none was created yet, a new empty glossary is created.
 """
 
 @doc "$(_doc_define_prop)"
 function define!(glossary::Glossary, entry::Symbol, property::Symbol, args...)
-    define!(glossary.terms[entry], property, args...)
+    if !haskey(glossary.terms, entry)
+        define!(glossary, entry, Term())
+    end
+    add!(glossary.terms[entry], property, args...)
     return glossary
 end
 
@@ -125,7 +133,7 @@ function define!(entry::Symbol, property::Symbol, args...)
     if isnothing(glossary)
         glossary = Glossary{T}()
     end
-    define!(glossary.terms[entry], property, args...)
+    define!(glossary, entry, property, args...)
     current_glossary!(glossary)
     return glossary
 end
