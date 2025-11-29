@@ -5,6 +5,22 @@ A format for glossary terms.
 """
 abstract type TermFormat end
 
+function (tf::TermFormat)(glossary::Glossary, keys = keys(glossary.terms); kwargs...)
+    s = ""
+    first = true
+    for k in keys
+        !first && (s *= "\n")
+        first && ((first = false))
+        if !haskey(glossary.terms, k)
+            @warn "Key $(k) not found in glossary. Ignoring it."
+            continue
+        end
+        s *= tf(glossary.terms[k]; kwargs...)
+    end
+    return s
+end
+
+
 """
     Argument <: TermFormat
 
