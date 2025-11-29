@@ -5,13 +5,13 @@ A concrete implementation of a glossary term with a dictionary of properties.
 These properties can be
 * `String`s
 * a function `(; kwargs...) -> String`
-* other further (nested)) [`GlossaryTerm`](@ref)s
+* other further (nested)) [`GlossarEntry`](@ref)s
 """
-struct Term{P <: Union{GlossaryTerm, String, <:Function}} <: GlossaryTerm
+struct Term{P <: Union{GlossarEntry, String, <:Function}} <: GlossarEntry
     name::String
     properties::Dict{Symbol, P}
 end
-Term(name::String = "") = Term(name, Dict{Symbol, Union{GlossaryTerm, String, <:Function}}())
+Term(name::String = "") = Term(name, Dict{Symbol, Union{GlossarEntry, String, <:Function}}())
 
 function Base.show(io::IO, term::Term)
     return _print(io, term)
@@ -21,7 +21,8 @@ function _print(io::IO, term::Term, args...; kwargs...)
     s = (length(term.name) == 0) ? "(unnamed term)" : "“$(term.name)” (term)"
     (length(term.properties)) == 0 && return print(io, s)
     for k in keys(term.properties)
-        s *= "\n  - :$(k)\t$(_print(term, k, args...; kwargs...))"
+        v = replace(_print(term, k, args...; kwargs...), '\n' => "\n\t")
+        s *= "\n  - :$(k)\t$(v)"
     end
     return print(io, s)
 end
@@ -38,7 +39,7 @@ function __print(v::Function, args...; kwargs...)
     (m.nargs != (length(args) + 1)) && return "$(v)"
     return v(args...; kwargs...)
 end
-__print(v::GlossaryTerm, args...; kwargs...) = _print(v, args...; kwargs...)
+__print(v::GlossarEntry, args...; kwargs...) = _print(v, args...; kwargs...)
 
 """
     add!(term::Term{P}, name::Symbol, value::Q) where {P, Q<:P}
@@ -51,25 +52,30 @@ function add!(term::Term{P}, name::Symbol, value::Q) where {P, Q <: P}
 end
 
 function Glossary()
-    glossary = Glossary(Dict{Symbol, GlossaryTerm}())
+    glossary = Glossary(Dict{Symbol, GlossarEntry}())
     current_glossary!(glossary)
     return glossary
 end
 
 function Base.show(io::IO, glossary::Glossary)
+    return _print(io, glossary)
+end
+
+function _print(io, glossary::Glossary)
     length(glossary.terms) == 0 && return print(io, "An Empty Glossary")
     s = "Glossary with $(length(glossary.terms)) terms:"
     for (k, v) in glossary.terms
-        s *= "\n* :$(k)\t$(repr(v))"
+        v = replace(repr(v), '\n' => "\n\t")
+        s *= "\n* :$(k)\t$(v)"
     end
     return print(io, s)
 end
 
 _doc_define_entry = """
     define!(entry::Symbol, name::String)
-    define!(entry::Symbol, term::T) where {T <: GlossaryTerm}
+    define!(entry::Symbol, term::T) where {T <: GlossarEntry}
     define!(glossary::Glossary, entry::Symbol, name::String)
-    define!(glossary::Glossary, entry::Symbol, term::T) where {T <: GlossaryTerm}
+    define!(glossary::Glossary, entry::Symbol, term::T) where {T <: GlossarEntry}
 
 Define a new [`Term`](@ref) in the [`Glossary`](@ref) `glossary` at `entry`.
 If given a `name`, a new [`Term`](@ref)`(name)` is created and added.
@@ -92,14 +98,14 @@ function define!(entry::Symbol, name::String = "")
 end
 
 @doc "$(_doc_define_entry)"
-function define!(glossary::Glossary{T}, entry::Symbol, term::S) where {T, S <: T}
-    glossary.terms[entry] = term
+function define!(glossary::Glossary{T}, key::Symbol, entry::S) where {T, S <: T}
+    glossary.terms[key] = entry
     current_glossary!(glossary)
     return glossary
 end
 
 @doc "$(_doc_define_entry)"
-function define!(entry::Symbol, term::S) where {S <: GlossaryTerm}
+function define!(entry::Symbol, term::S) where {S <: GlossarEntry}
     glossary = current_glossary()
     if isnothing(glossary)
         glossary = Glossary()
@@ -123,7 +129,13 @@ function define!(glossary::Glossary, entry::Symbol, property::Symbol, args...)
     if !haskey(glossary.terms, entry)
         define!(glossary, entry, Term())
     end
-    add!(glossary.terms[entry], property, args...)
+    pass_to = glossary.terms[entry]
+    if pass_to isa Glossary
+        define!(pass_to, property, args...)
+    else
+        add!(glossary.terms[entry], property, args...)
+    end
+    current_glossary!(glossary)
     return glossary
 end
 
