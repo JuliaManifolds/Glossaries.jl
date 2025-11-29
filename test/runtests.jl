@@ -5,10 +5,10 @@
 using Glossaries, Test
 
 t = Glossaries.Term("manifold")
-Glossaries.define!(t, :type, "AbstractManifold")
-Glossaries.define!(t, :description, " a Riemannian manifold")
-Glossaries.define!(t, :default, "Sphere(2)")
-Glossaries.define!(t, :math, raw"\mathcal M")
+Glossaries.add!(t, :type, "AbstractManifold")
+Glossaries.add!(t, :description, " a Riemannian manifold")
+Glossaries.add!(t, :default, "Sphere(2)")
+Glossaries.add!(t, :math, raw"\mathcal M")
 
 arg = Glossaries.Argument(true)
 println(arg(t)) #print as argument:
@@ -26,3 +26,10 @@ println(m(t)) #print as math:
 mt = Glossaries.MathTerm()
 println(mt(t)) #print as math:
 # a Riemannian manifold ``\mathcal M``
+
+# Define in (current/new) glossary
+g = Glossaries.define!(:manifold, t)
+g = Glossaries.define!(:pkg_name, "Glossaries.jl")
+arg(:manifold) # prints the same as above, since we added t to the current glossary
+# but we can also print all from current
+arg() |> print

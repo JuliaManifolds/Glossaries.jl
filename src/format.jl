@@ -1,11 +1,30 @@
 """
-    TermFormat
+    TermFormatter
 
-A format for glossary terms.
+A format for glossary terms. It always acts as a functor with the following mathods:
+
+    (tf::TermFormatter)(keys::Vector{Symbol}; kwargs...)`
+    (tf::TermFormatter)(glossary::Glossary, keys::Vector{Symbol}; kwargs...)`
+
+format all given `keys` of a `glossary` using the format `tf`.
+If the `glossary` is not given, the [`current_glossary`](@ref) is used,
+if no `keys` are given, all keys of the glossary are used.
+
+    (tf::TermFormatter)(key::Symbol; kwargs...)`
+    (tf::TermFormatter)(glossary::Glossary, key::Symbol; kwargs...)`
+
+format the given `key` of a `glossary` using the format `tf`.
+If the `glossary` is not given, the [`current_glossary`](@ref) is used.
+
+Formatting a single [`Term`](@ref) is done by calling
+
+    (tf::TermFormatter)(term::Term; kwargs...)
+
+where `term` is the [`Term`](@ref) to format. This should be implemented by all subtypes of `TermFormatter`.
 """
-abstract type TermFormat end
+abstract type TermFormatter end
 
-function (tf::TermFormat)(glossary::Glossary, keys = keys(glossary.terms); kwargs...)
+function (tf::TermFormatter)(glossary::Glossary, keys = keys(glossary.terms); kwargs...)
     s = ""
     first = true
     for k in keys
@@ -19,8 +38,15 @@ function (tf::TermFormat)(glossary::Glossary, keys = keys(glossary.terms); kwarg
     end
     return s
 end
+function (tf::TermFormatter)(
+        ks::Vector{Symbol} = !isnothing(current_glossary()) ? collect(keys(current_glossary().terms)) : Symbol[]; kwargs...
+    )
+    glossary = current_glossary()
+    isnothing(glossary) && error("No current glossary found. Please create a glossary  first.")
+    return tf(glossary, ks; kwargs...)
+end
 
-function (tf::TermFormat)(glossary::Glossary, key::Symbol; kwargs...)
+function (tf::TermFormatter)(glossary::Glossary, key::Symbol; kwargs...)
     s = ""
     if haskey(glossary.terms, key)
         s *= tf(glossary.terms[key]; kwargs...)
@@ -29,14 +55,19 @@ function (tf::TermFormat)(glossary::Glossary, key::Symbol; kwargs...)
     end
     return s
 end
+function (tf::TermFormatter)(key::Symbol; kwargs...)
+    glossary = current_glossary()
+    isnothing(glossary) && error("No current glossary found. Please create a glossary  first.")
+    return tf(glossary, key; kwargs...)
+end
 
 
 """
-    Argument <: TermFormat
+    Argument <: TermFormatter
 
 A format representing a function argument.
 """
-struct Argument <: TermFormat
+struct Argument <: TermFormatter
     show_type::Bool
 end
 Argument(; show_type::Bool = true) = Argument(show_type)
@@ -54,11 +85,11 @@ function (arg::Argument)(term::Term; kwargs...)
 end
 
 """
-    Keyword <: TermFormat
+    Keyword <: TermFormatter
 
 A format representing a function keyword argument.
 """
-struct Keyword <: TermFormat
+struct Keyword <: TermFormatter
     show_type::Bool
 end
 Keyword(; show_type::Bool = true) = Keyword(show_type)
@@ -78,11 +109,11 @@ function (kw::Keyword)(term::Term; kwargs...)
 end
 
 """
-    Math <: TermFormat
+    Math <: TermFormatter
 
 print the math format
 """
-struct Math <: TermFormat end
+struct Math <: TermFormatter end
 
 # Functor for a term
 function (::Math)(term::Term; kwargs...)
@@ -90,7 +121,7 @@ function (::Math)(term::Term; kwargs...)
 end
 
 """
-    MathTerm <: TermFormat
+    MathTerm <: TermFormatter
 
 print the math as a term in text, using the description if it exists, otherwise just the name
 as prefix
@@ -103,7 +134,7 @@ as prefix
 
 Use the default Julia documentation math delimiter ``` ``...`` ```.
 """
-struct MathTerm <: TermFormat
+struct MathTerm <: TermFormatter
     delimiter::String
 end
 MathTerm() = MathTerm("``")
@@ -114,11 +145,11 @@ function (mt::MathTerm)(term::Term; kwargs...)
 end
 
 """
-    Plain <: TermFormat
+    Plain <: TermFormatter
 
 A plain format representing just the term name.
 """
-struct Plain <: TermFormat end
+struct Plain <: TermFormatter end
 
 # Functor for a term
 function (::Plain)(term::Term; kwargs...)
