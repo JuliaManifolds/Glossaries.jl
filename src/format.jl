@@ -20,6 +20,16 @@ function (tf::TermFormat)(glossary::Glossary, keys = keys(glossary.terms); kwarg
     return s
 end
 
+function (tf::TermFormat)(glossary::Glossary, key::Symbol; kwargs...)
+    s = ""
+    if haskey(glossary.terms, key)
+        s *= tf(glossary.terms[key]; kwargs...)
+    else
+        @warn "Key $(key) not found in glossary. Ignoring it."
+    end
+    return s
+end
+
 
 """
     Argument <: TermFormat
