@@ -118,7 +118,9 @@ end
 @doc "$(_doc_define_entry)"
 function define!(entry::Symbol, term::S) where {S <: GlossarEntry}
     glossary = current_glossary()
-    if isnothing(glossary)
+    # if we do not have a glossary yet, or the term is the glossary itself:
+    # (here in the implicit case, avoid recursion, this has to be done explicitly)
+    if isnothing(glossary) || (term === glossary)
         glossary = Glossary()
     end
     define!(glossary, entry, term)
