@@ -1,17 +1,39 @@
 """
-    Term{P}
+    Term{P} <: GlossarEntry
 
-A concrete implementation of a glossary term with a dictionary of properties.
+A concrete implementation of a term in a [`Glossary`](@ref).
+
+# Fields
+* `name::String`: The name of the term.
+* `properties::Dict{Symbol, P}`: A dictionary of properties associated with the term
+
 These properties can be
+
 * `String`s
-* a function `(; kwargs...) -> String`
+* a function `(args...; kwargs...) -> String`
 * other further (nested)) [`GlossarEntry`](@ref)s
+
+# Constructors
+
+    Term(terms = Dict{Symbol, Union{GlossarEntry, String, <:Function}}())
+
+Create a new empty [`Term`](@ref) with the given `name`.
+
+    Term(name::String)
+
+Create a new empty [`Term`](@ref) and directly set its `:name`.
 """
-struct Term{P <: Union{GlossarEntry, String, <:Function}} <: GlossarEntry
-    name::String
-    properties::Dict{Symbol, P}
+struct Term{T <: Union{GlossarEntry, String, <:Function}} <: GlossarEntry
+    properties::Dict{Symbol, T}
+    function Term(
+        terms::Dict{Symbol, T} = Dict{Symbol, Union{GlossarEntry, String, <:Function}}()
+        ) where {T <: Union{GlossarEntry, String, <:Function}}
+        return new{T}(terms)
+    end
 end
-Term(name::String = "") = Term(name, Dict{Symbol, Union{GlossarEntry, String, <:Function}}())
+function Term(name::String)
+    Term( Dict{Symbol, Union{GlossarEntry, String, <:Function}}(:name => name))
+end
 
 function Base.show(io::IO, term::Term)
     return _print(io, term)
@@ -22,8 +44,10 @@ function _print(io::IO, term::Term, args...; kwargs...)
 end
 
 function _print(term::Term, args...; kwargs...)
-    s = (length(term.name) == 0) ? "(unnamed term)" : "“$(term.name)” (term)"
-    (length(term.properties)) == 0 && return s
+    # We use :name as a special field
+    n = "“$(get(term.properties, :name, ""))”"
+    s = "Term $n"
+    (length(term.properties)) == 0 && return s * " with no properties."
     for k in keys(term.properties)
         v = replace(_print(term.properties[k], args...; kwargs...), '\n' => "\n\t")
         s *= "\n  - :$(k)\t$(v)"

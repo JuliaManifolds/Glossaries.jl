@@ -1,0 +1,6 @@
+[deps]
+Glossaries = "8f48dd54-e453-4cdc-9500-53b96149560b"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[sources]
+Glossaries = {path = ".."}

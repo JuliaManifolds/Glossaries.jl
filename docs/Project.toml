@@ -2,3 +2,7 @@
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 DocumenterCitations = "daee34ce-89f3-4625-b898-19384cb65244"
 DocumenterInterLinks = "d12716ef-a0f6-4df4-a9f1-a5a34e75c656"
+Glossaries = "8f48dd54-e453-4cdc-9500-53b96149560b"
+
+[sources]
+Glossaries = {path = ".."}

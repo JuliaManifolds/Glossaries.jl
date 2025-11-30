@@ -6,7 +6,7 @@ using Glossaries, Test
 
 t = Glossaries.Term("manifold")
 Glossaries.add!(t, :type, "AbstractManifold")
-Glossaries.add!(t, :description, " a Riemannian manifold")
+Glossaries.add!(t, :description, "a Riemannian manifold")
 Glossaries.add!(t, :default, "Sphere(2)")
 Glossaries.add!(t, :math, raw"\mathcal M")
 
@@ -30,6 +30,7 @@ println(mt(t)) #print as math:
 # Define in (current/new) glossary
 g = Glossaries.define!(:manifold, t)
 g = Glossaries.define!(:pkg_name, "Glossaries.jl")
+Glossaries.define!(:pkg_name, :description, "A Julia package for glossaries.")
 arg(:manifold) # prints the same as above, since we added t to the current glossary
 # but we can also print all from current
 arg() |> print

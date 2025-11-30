@@ -49,7 +49,8 @@ isdir(generated_path) || mkdir(generated_path)
 for (md_file, doc_file) in
     [
         # ("CONTRIBUTING.md", "contributing.md"),
-        ("NEWS.md", "news.md")]
+        ("NEWS.md", "news.md"),
+    ]
     open(joinpath(generated_path, doc_file), "w") do io
         # Point to source license file
         println(
@@ -73,7 +74,7 @@ makedocs(;
     format = Documenter.HTML(;
         prettyurls = run_on_CI || ("--prettyurls" ∈ ARGS),
     ),
-    modules = [Glossaries,],
+    modules = [Glossaries],
     authors = "Ronny Bergmann <ronny.bergmann@ntnu.no> and contributors.",
     sitename = "Glossaries.jl",
     pages = [

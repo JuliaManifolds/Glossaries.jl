@@ -78,7 +78,7 @@ Argument(; show_type::Bool = true) = Argument(show_type)
 
 # Functor for a term
 function (arg::Argument)(term::Term, args...; kwargs...)
-    s = "* `$(term.name)"
+    s = "* `$(get(term.properties, :name, ""))"
     if haskey(term.properties, :type) && arg.show_type
         s *= "::`[`$(_print(term, :type, args...; kwargs...))`](@ref)"
     else
@@ -101,7 +101,7 @@ Keyword(; show_type::Bool = true) = Keyword(show_type)
 
 # Functor for a term
 function (kw::Keyword)(term::Term, args...; kwargs...)
-    s = "* `$(term.name)"
+    s = "* `$(get(term.properties, :name, ""))"
     if haskey(term.properties, :type) && kw.show_type
         s *= "::`[`$(_print(term, :type, args...; kwargs...))`](@ref)"
     else
@@ -147,7 +147,7 @@ MathTerm() = MathTerm("``")
 
 # Functor for a term
 function (mt::MathTerm)(term::Term, args...; kwargs...)
-    return "$(get(term.properties, :description, term.name)) $(mt.delimiter)$(_print(term, :math, args...; kwargs...))$(mt.delimiter)"
+    return "$(get(term.properties, :description, "")) $(mt.delimiter)$(_print(term, :math, args...; kwargs...))$(mt.delimiter)"
 end
 
 """
@@ -159,5 +159,5 @@ struct Plain <: TermFormatter end
 
 # Functor for a term
 function (::Plain)(term::Term, args...; kwargs...)
-    return term.name
+    return get(term.properties, :name, "An unnamed term")
 end
