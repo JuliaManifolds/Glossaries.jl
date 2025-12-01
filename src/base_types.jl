@@ -5,8 +5,6 @@ An abstract type representing a term in a glossary.
 """
 abstract type GlossarEntry end
 
-function current_glossary! end
-
 """
     Glossary{T} <: GlossarEntry
 
@@ -20,13 +18,9 @@ As [`Glossary`](@ref) is a subtype of [`GlossarEntry`](@ref), glossaries can be 
 
     Glossary(terms = Dict{Symbol, GlossarEntry}(); current = true
 
-Creates a new (empty) `Glossary` instance. This also sets this glossary as the [`current_glossary`](@ref).
+Creates a new (empty) `Glossary` instance.
 """
 struct Glossary{T <: GlossarEntry} <: GlossarEntry
     terms::Dict{Symbol, T}
-    function Glossary(terms::Dict{Symbol, T} = Dict{Symbol, GlossarEntry}()) where {T <: GlossarEntry}
-        glossary = new{T}(terms)
-        current_glossary!(glossary)
-        return glossary
-    end
 end
+Glossary() = Glossary(Dict{Symbol, GlossarEntry}())

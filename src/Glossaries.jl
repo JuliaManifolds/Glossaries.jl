@@ -16,28 +16,34 @@ module Glossaries
 
 include("base_types.jl")
 
-# Adapted from the idea in Makie.jl and their CURRENT_FIGURE
-const _CURRENT_GLOSSARY = Ref{Union{Nothing, Glossary}}(nothing)
-const _CURRENT_GLOSSARY_LOCK = Base.ReentrantLock()
+macro Glossary()
+    return esc(
+        quote
+            # Adapted from the idea in Makie.jl and their CURRENT_FIGURE
+            const _CURRENT_GLOSSARY = Ref{Union{Nothing, Glossaries.Glossary}}(nothing)
+            const _CURRENT_GLOSSARY_LOCK = Base.ReentrantLock()
 
-"""
-    current_glossary()
+            """
+                current_glossary()
 
-Returns the current active glossary (or the last glossary created).
-Returns `nothing` if there is no current active glossary.
+            Returns the current active glossary (or the last glossary created).
+            Returns `nothing` if there is no current active glossary.
 
-The access is thread-safe, since it also uses a lock.
-"""
-current_glossary() = lock(() -> _CURRENT_GLOSSARY[], _CURRENT_GLOSSARY_LOCK)
+            The access is thread-safe, since it also uses a lock.
+            """
+            current_glossary() = lock(() -> _CURRENT_GLOSSARY[], _CURRENT_GLOSSARY_LOCK)
 
-"""
-    current_glossary!(glossary)
+            """
+                current_glossary!(glossary)
 
-Set `glossary` as the current active glossary.
+            Set `glossary` as the current active glossary.
 
-The access is thread-safe, since it also uses a lock.
-"""
-current_glossary!(glossary) = lock(() -> (_CURRENT_GLOSSARY[] = glossary), _CURRENT_GLOSSARY_LOCK)
+            The access is thread-safe, since it also uses a lock.
+            """
+            current_glossary!(glossary) = lock(() -> (_CURRENT_GLOSSARY[] = glossary), _CURRENT_GLOSSARY_LOCK)
+        end
+    )
+end
 
 include("terms.jl")
 include("format.jl")

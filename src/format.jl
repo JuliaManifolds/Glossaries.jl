@@ -25,7 +25,7 @@ where `term` is the [`Term`](@ref) to format. This should be implemented by all 
 To what extend a certain formatter does support additional `args...` depends on the formatter.
 All should accept `kwargs...`.
 """
-abstract type TermFormatter end
+abstract type TermFormatter{WM} end
 
 function (tf::TermFormatter)(glossary::Glossary, keys = keys(glossary.terms), args...; kwargs...)
     s = ""
@@ -41,11 +41,11 @@ function (tf::TermFormatter)(glossary::Glossary, keys = keys(glossary.terms), ar
     end
     return s
 end
-function (tf::TermFormatter)(
-        ks::Vector{Symbol} = !isnothing(current_glossary()) ? collect(keys(current_glossary().terms)) : Symbol[];
+function (tf::TermFormatter{WM})(
+        ks::Vector{Symbol} = !isnothing(WM.current_glossary()) ? collect(keys(WM.current_glossary().terms)) : Symbol[];
         kwargs...
-    )
-    glossary = current_glossary()
+    ) where {WM}
+    glossary = WM.current_glossary()
     isnothing(glossary) && error("No current glossary found. Please create a glossary  first.")
     return tf(glossary, ks; kwargs...)
 end
@@ -59,8 +59,8 @@ function (tf::TermFormatter)(glossary::Glossary, key::Symbol, args...; kwargs...
     end
     return s
 end
-function (tf::TermFormatter)(key::Symbol, args...; kwargs...)
-    glossary = current_glossary()
+function (tf::TermFormatter{WM})(key::Symbol, args...; kwargs...) where {WM}
+    glossary = WM.current_glossary()
     isnothing(glossary) && error("No current glossary found. Please create a glossary  first.")
     return tf(glossary, key, args...; kwargs...)
 end
@@ -71,10 +71,16 @@ end
 
 A format representing a function argument.
 """
-struct Argument <: TermFormatter
+struct Argument{WM} <: TermFormatter{WM}
     show_type::Bool
 end
-Argument(; show_type::Bool = true) = Argument(show_type)
+Argument(show_type::Bool) = Argument{Main}(show_type)
+Argument(; show_type::Bool = true) = Argument{Main}(show_type)
+Argument{WM}(; show_type::Bool = true) where {WM} = Argument{WM}(show_type)
+
+macro Argument(show_type = true)
+    return esc(:(Glossaries.Argument{@__MODULE__}($show_type)))
+end
 
 # Functor for a term
 function (arg::Argument)(term::Term, args...; kwargs...)
@@ -94,10 +100,17 @@ end
 A format representing a function keyword argument.
 Keyword arguments are passed to `:type`, and `:default`, and `:description` properties.
 """
-struct Keyword <: TermFormatter
+struct Keyword{WM} <: TermFormatter{WM}
     show_type::Bool
 end
+Keyword(show_type::Bool) = Keyword{Main}(show_type)
 Keyword(; show_type::Bool = true) = Keyword(show_type)
+Keyword{WM}(; show_type::Bool = true) where {WM} = Keyword{WM}(show_type)
+Keyword(m::Module; show_type::Bool = true) = Keyword{m}(show_type)
+
+macro Keyword(show_type = true)
+    return esc(:(Glossaries.Keyword{@__MODULE__}($show_type)))
+end
 
 # Functor for a term
 function (kw::Keyword)(term::Term, args...; kwargs...)
@@ -119,7 +132,13 @@ end
 print the math format. This formatter of a term passes all arguments and keyword arguments
 to the underlying term formatting for the `:math` property.
 """
-struct Math <: TermFormatter end
+struct Math{WM} <: TermFormatter{WM} end
+Math() = Math{Main}()
+Math(m::Module) = Math{m}()
+
+macro Math(show_type = true)
+    return esc(:(Glossaries.Math{@__MODULE__}($show_type)))
+end
 
 # Functor for a term
 function (::Math)(term::Term, args...; kwargs...)
@@ -140,10 +159,17 @@ as prefix
 
 Use the default Julia documentation math delimiter ``` ``...`` ```.
 """
-struct MathTerm <: TermFormatter
+struct MathTerm{WM} <: TermFormatter{WM}
     delimiter::String
 end
-MathTerm() = MathTerm("``")
+MathTerm() = MathTerm{Main}()
+MathTerm{MW}() where {MW} = MathTerm{MW}("``")
+MathTerm(m::Module) = MathTerm{m}()
+
+macro MathTerm(show_type = true)
+    return esc(:(Glossaries.MathTerm{@__MODULE__}($show_type)))
+end
+
 
 # Functor for a term
 function (mt::MathTerm)(term::Term, args...; kwargs...)
@@ -155,7 +181,13 @@ end
 
 A plain format representing just the term name.
 """
-struct Plain <: TermFormatter end
+struct Plain{WM} <: TermFormatter{WM} end
+Plain() = Plain{Main}()
+Plain(m::Module) = Plain{m}()
+
+macro Plain(show_type = true)
+    return esc(:(Glossaries.Plain{@__MODULE__}($show_type)))
+end
 
 # Functor for a term
 function (::Plain)(term::Term, args...; kwargs...)
