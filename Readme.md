@@ -1,4 +1,4 @@
-# Glossaries.jl
+# ?? Glossaries.jl
 
 [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://juliamanifolds.github.io/Glossaries.jl/stable/)
 [![](https://img.shields.io/badge/docs-dev-blue.svg)](https://juliamanifolds.github.io/Glossaries.jl/dev/)

@@ -1,5 +1,5 @@
 """
-    Glossaries.jl
+    🗃️ Glossaries.jl
 
 A Julia package for managing glossaries of terms, including their metadata,
 for example their mathematical notation.
