@@ -107,66 +107,69 @@ function _print(glossary::Glossary, args...; kwargs...)
 end
 
 _doc_define_entry = """
-    define!(entry::Symbol, name::String)
-    define!(entry::Symbol, term::T) where {T <: GlossarEntry}
-    define!(glossary::Glossary, entry::Symbol, name::String)
-    define!(glossary::Glossary, entry::Symbol, term::T) where {T <: GlossarEntry}
+    define!(glossary::Glossary, key::Symbol, name::String)
+    define!(glossary::Glossary, key::Symbol, term::T) where {T <: GlossarEntry}
+    define!(wm::Module, key::Symbol, name::String)
+    define!(wm::Module, key::Symbol, term::T) where {T <: GlossarEntry}
 
-Define a new [`Term`](@ref) in the [`Glossary`](@ref) `glossary` at `entry`.
-If given a `name`, a new [`Term`](@ref)`(name)` is created and added.
+Define a new [`Term`](@ref) in the [`Glossary`](@ref) `glossary` at `key`
+or a new [`Term`](@ref)`(name)` if just providing a string.
 
-If no `glossary` is given, the current active glossary (or the last created glossary) is used. If none was created yet, a new empty glossary is created.
+If a `Module` `wm` is given, the term is added to the current active glossary
 """
 
 @doc "$(_doc_define_entry)"
-define!(wm::Module, glossary::Glossary, entry::Symbol, name::String = "") = define!(wm, glossary, entry, Term(name))
+define!(glossary::Glossary, key::Symbol, name::String = "") = define!(glossary, key, Term(name))
 
 @doc "$(_doc_define_entry)"
-function define!(wm::Module, entry::Symbol, name::String = "")
+function define!(glossary::Glossary{T}, key::Symbol, entry::S) where {T, S <: T}
+    glossary.terms[key] = entry
+    return glossary
+end
+@doc "$(_doc_define_entry)"
+function define!(wm::Module, key::Symbol, name::String = "")
     glossary = wm.current_glossary()
     if isnothing(glossary)
         glossary = Glossary()
+        define!(wm, glossary)
     end
-    define!(wm, glossary, entry, name)
-    wm.current_glossary!(glossary)
+    define!(glossary, key, name)
     return glossary
 end
-
 @doc "$(_doc_define_entry)"
-function define!(wm::Module, glossary::Glossary{T}, key::Symbol, entry::S) where {T, S <: T}
-    glossary.terms[key] = entry
-    wm.current_glossary!(glossary)
-    return glossary
-end
-
-@doc "$(_doc_define_entry)"
-function define!(wm::Module, entry::Symbol, term::S) where {S <: GlossarEntry}
+function define!(wm::Module, key::Symbol, term::S) where {S <: GlossarEntry}
     glossary = wm.current_glossary()
     # if we do not have a glossary yet, or the term is the glossary itself:
     # (here in the implicit case, avoid recursion, this has to be done explicitly)
     if isnothing(glossary) || (term === glossary)
         glossary = Glossary()
+        define!(wm, glossary)
     end
-    define!(wm, glossary, entry, term)
-    wm.current_glossary!(glossary)
+    define!(glossary, key, term)
     return glossary
 end
 
+_doc_define_gloss = """
+    define!(wm::Module, glossary::Glossary)
+
+Set the current active glossary in the given module `wm` to `glossary`.
+Soo also [`current_glossary!`](@ref).
+"""
+
+@doc "$(_doc_define_gloss)"
+define!(wm::Module, glossary::Glossary) = wm.current_glossary!(glossary)
+
 _doc_define_prop = """
-    define!(entry::Symbol, property::Symbol, args...)
+    define!(wm::Module, entry::Symbol, property::Symbol, args...)
     define!(glossary::Glossary, entry::Symbol, property::Symbol, args...)
 
-Define a property `property` with value `args...` for the [`Term`](@ref) at `entry` in [`Glossary`](@ref) `glossary`.
+Define a property `property` with value `args...` for the [`Term`](@ref) at the `key` in [`Glossary`](@ref) `glossary`.
 If the term does not exist yet, it is created as an empty [`Term`](@ref)`()`.
-If no `glossary` is given, the current active glossary (or the last created glossary) is used. If none was created yet, a new empty glossary is created.
+
+If a `Module` `wm` is given, the term is added to the current active glossary of that module.
 """
 
 @doc "$(_doc_define_prop)"
-function define!(wm::Module, glossary::Glossary, entry::Symbol, property::Symbol, args...)
-    define!(glossary, entry, property, args...)
-    wm.current_glossary!(glossary)
-    return glossary
-end
 function define!(glossary::Glossary, entry::Symbol, property::Symbol, args...)
     if !haskey(glossary.terms, entry)
         define!(glossary, entry, Term())
@@ -179,18 +182,29 @@ function define!(glossary::Glossary, entry::Symbol, property::Symbol, args...)
     end
     return glossary
 end
-
 @doc "$(_doc_define_prop)"
 function define!(wm::Module, entry::Symbol, property::Symbol, args...)
     glossary = wm.current_glossary()
     if isnothing(glossary)
-        glossary = Glossary{T}()
+        glossary = Glossary()
+        define!(wm, glossary)
     end
     define!(glossary, entry, property, args...)
-    wm.current_glossary!(glossary)
     return glossary
 end
 
+"""
+    @define!(entry::Symbol, name::String)
+    @define!(entry::Symbol, term::T) where {T <: GlossarEntry}
+    @define!(entry::Symbol, property::Symbol, args...)
+
+A macro to define a new [`Term`](@ref) in the [`current_glossary`](@ref) of the current module
+or a property of a [`Term`](@ref).
+If given a String `name` is provided, a new [`Term`](@ref)`(name)` is created and added to the
+current glossary.
+
+Since this requires to call `@__MODULE__`, this is wrapped in a macro for convenience.
+"""
 macro define!(args...)
     return esc(:(Glossaries.define!(@__MODULE__, $(args...))))
 end

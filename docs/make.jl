@@ -12,16 +12,43 @@ if "--help" ∈ ARGS
         Arguments
         * `--help`              - print this help and exit without rendering the documentation
         * `--prettyurls`        – toggle the pretty urls part to true, which is always set on CI
+        * `--quarto`            – (re)run the Quarto notebooks from the `tutorials/` folder before
+          generating the documentation. If they are generated once they are cached accordingly.
+          Then you can spare time in the rendering by not passing this argument.
+          If quarto is not run, some tutorials are generated as empty files, since they
+          are referenced from within the documentation.
+          These are currently `getstarted.md`.
         """
     )
     exit(0)
 end
 run_on_CI = (get(ENV, "CI", nothing) == "true")
+run_quarto = "--quarto" in ARGS
+tutorials_in_menu = true # Change once we have more than the default tutorial
+tutorials_menu = "Get started with Glossaries.jl" => "tutorials/getstarted.md"
+
+fn = joinpath(@__DIR__, "src/tutorials/", "getstarted.md")
+if (!isfile(fn) || filesize(fn) == 0) && !run_quarto
+    @warn "Tutorial Get started with Glossaries.jl does not exist at $fn."
+    @warn "Generating empty file, since this tutorial is linked to from the documentation."
+    touch(fn)
+end
 
 if Base.active_project() != joinpath(@__DIR__, "Project.toml")
     using Pkg
     Pkg.activate(@__DIR__)
     Pkg.instantiate()
+end
+
+if run_quarto || run_on_CI
+    @info "Rendering Quarto"
+    tutorials_folder = (@__DIR__) * "/../tutorials"
+    # instantiate the tutorials environment if necessary
+    Pkg.activate(tutorials_folder)
+    # For a breaking release -> also set the tutorials folder to the most recent version
+    Pkg.instantiate()
+    Pkg.activate(@__DIR__) # but return to the docs one before
+    run(`quarto render $(tutorials_folder)`)
 end
 
 using Documenter
@@ -79,7 +106,7 @@ makedocs(;
     sitename = "Glossaries.jl",
     pages = [
         "Home" => "index.md",
-        "Getting Started" => "getting_started.md",
+        (tutorials_in_menu ? [tutorials_menu] : [])...,
         "Reference" => "reference.md",
         "Changelog" => "news.md",
     ],

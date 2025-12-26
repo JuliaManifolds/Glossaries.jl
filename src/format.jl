@@ -1,7 +1,7 @@
 """
     TermFormatter
 
-A format for glossary terms. It always acts as a functor with the following mathods:
+A format for glossary terms. It always acts as a functor with the following methods:
 
     (tf::TermFormatter)(keys::Vector{Symbol}; kwargs...)`
     (tf::TermFormatter)(glossary::Glossary, keys::Vector{Symbol}; kwargs...)`

@@ -1,0 +1,25 @@
+---
+title: "Get Started with Glossaries.jl"
+author: "Ronny Bergmann"
+date: "2025-12-26"
+---
+
+This tutorial provides a short introduction to using the package [`Glossaries.jl`](https://github.com/JuliaManifolds/Glossaries.jl/) for managing either a small own glossary or a glossary for a certain package.
+
+```{julia}
+#| echo: false
+#| code-fold: true
+#| output: false
+using Pkg;
+cd(@__DIR__)
+Pkg.activate("."); # for reproducibility use the local tutorial environment.
+```
+
+## Starting a new Glossary
+
+To start a new glossary, you first need to create a `Glossary` object. This can be done by simply calling the constructor:
+
+```{julia}
+using Glossaries
+g = Glossary()
+```
