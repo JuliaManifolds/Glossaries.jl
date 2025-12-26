@@ -1,5 +1,6 @@
 """
-    🗃️ Glossaries.jl
+🗃️ Glossaries.jl – manage a glossary for arguments, keywords and other snippets and terms for
+  the documentation of your Julia package.
 
 A Julia package for managing glossaries of terms, including their metadata,
 for example their mathematical notation.
