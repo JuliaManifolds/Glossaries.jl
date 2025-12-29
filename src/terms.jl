@@ -4,7 +4,6 @@
 A concrete implementation of a term in a [`Glossary`](@ref).
 
 # Fields
-* `name::String`: The name of the term.
 * `properties::Dict{Symbol, P}`: A dictionary of properties associated with the term
 
 These properties can be

@@ -59,7 +59,7 @@ function (tf::TermFormatter)(glossary::Glossary, key::Symbol, args...; kwargs...
     end
     return s
 end
-function (tf::TermFormatter{WM})(key::Symbol, args...; kwargs...) where {WM<:Module}
+function (tf::TermFormatter{WM})(key::Symbol, args...; kwargs...) where {WM <: Module}
     glossary = WM.current_glossary()
     isnothing(glossary) && error("No current glossary found. Please create a glossary  first.")
     return tf(glossary, key, args...; kwargs...)
