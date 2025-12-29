@@ -59,17 +59,38 @@ function (tf::TermFormatter)(glossary::Glossary, key::Symbol, args...; kwargs...
     end
     return s
 end
-function (tf::TermFormatter{WM})(key::Symbol, args...; kwargs...) where {WM}
+function (tf::TermFormatter{WM})(key::Symbol, args...; kwargs...) where {WM<:Module}
     glossary = WM.current_glossary()
     isnothing(glossary) && error("No current glossary found. Please create a glossary  first.")
     return tf(glossary, key, args...; kwargs...)
 end
 
-
 """
     Argument <: TermFormatter
 
 A format representing a function argument.
+
+Given a [`Term`](@ref), this formatter expects the following properties to be set:
+* `:name`: the name of the argument
+* `:type`: the type of the argument (optional)
+* `:description`: the description of the argument
+
+This formatter prints
+```
+* `name::[type](@ref): description`
+```
+
+# Fields
+
+* `show_type::Bool`: whether to show the type of the argument
+
+# Constructor
+
+    Argument(show_type::Bool = true)
+    @Argument(show_type::Bool = true)
+
+Create a new `Argument` formatter, where the macro variant takes the current modules glossary
+as default, see the different forms to call a formatter at [`TermFormatter`](@ref).
 """
 struct Argument{WM} <: TermFormatter{WM}
     show_type::Bool
@@ -99,6 +120,28 @@ end
 
 A format representing a function keyword argument.
 Keyword arguments are passed to `:type`, and `:default`, and `:description` properties.
+
+This formatter expects the following properties to be set:
+* `:name`: the name of the keyword argument
+* `:type`: the type of the keyword argument (optional)
+* `:default`: the default value of the keyword argument (optional)
+* `:description`: the description of the keyword argument
+
+This formatter prints
+```
+* `name::[type](@ref) = default`: description`
+```
+
+# Fields
+* `show_type::Bool`: whether to show the type of the keyword argument
+
+# Constructor
+
+    Keyword(show_type::Bool = true)
+    @Keyword(show_type::Bool = true)
+
+Create a new `Keyword` formatter, where the macro variant takes the current modules glossary
+as default, see the different forms to call a formatter at [`TermFormatter`](@ref).
 """
 struct Keyword{WM} <: TermFormatter{WM}
     show_type::Bool
@@ -131,6 +174,13 @@ end
 
 print the math format. This formatter of a term passes all arguments and keyword arguments
 to the underlying term formatting for the `:math` property.
+
+# Constructor
+    Math()
+    @Math()
+
+Create a new `Math` formatter, where the macro variant takes the current modules glossary
+as default, see the different forms to call a formatter at [`TermFormatter`](@ref).
 """
 struct Math{WM} <: TermFormatter{WM} end
 Math() = Math{Main}()
@@ -148,16 +198,34 @@ end
 """
     MathTerm <: TermFormatter
 
-print the math as a term in text, using the description if it exists, otherwise just the name
-as prefix
+A formatter for mathematical terms.
+
+This formatter expects the following properties to be set:
+* `:description`: the description of the term
+* `:math`: the math expression of the term
+
+This formatter prints
+
+```
+description delimiter math delimiter
+```
 
 # Fields
+
 * `delimiter::String`: the delimiter to use around the math expression
 
 # Constructor
     MathTerm(delimiter::String="``")
 
 Use the default Julia documentation math delimiter ``` ``...`` ```.
+
+# Constructor
+
+    MathTerm(delimiter::String="``")
+    @MathTerm(delimiter::String="``")
+
+Create a new `MathTerm` formatter, where the macro variant takes the current modules glossary
+as default, see the different forms to call a formatter at [`TermFormatter`](@ref).
 """
 struct MathTerm{WM} <: TermFormatter{WM}
     delimiter::String
@@ -179,7 +247,16 @@ end
 """
     Plain <: TermFormatter
 
-A plain format representing just the term name.
+A plain format representing just the terms `:name`.
+
+It then prints really just the name of the term.
+
+# Constructor
+    Plain()
+    @Plain()
+
+Create a new `Plain` formatter, where the macro variant takes the current modules glossary
+as default, see the different forms to call a formatter at [`TermFormatter`](@ref).
 """
 struct Plain{WM} <: TermFormatter{WM} end
 Plain() = Plain{Main}()
