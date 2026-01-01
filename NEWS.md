@@ -8,4 +8,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] Unreleased
 
 ### Added
-- Initial release of `Glossaries.jl`.
+- Initial release of `Glossaries.jl`
