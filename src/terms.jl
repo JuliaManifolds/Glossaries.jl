@@ -14,7 +14,7 @@ These properties can be
 
 # Constructors
 
-    Term(terms = Dict{Symbol, Union{GlossarEntry, String, <:Function}}())
+    Term(properties = Dict{Symbol, Union{GlossarEntry, String, <:Function}}())
 
 Create a new empty [`Term`](@ref) with the given `name`.
 
@@ -22,16 +22,16 @@ Create a new empty [`Term`](@ref) with the given `name`.
 
 Create a new empty [`Term`](@ref) and directly set its `:name`.
 """
-struct Term{T <: Union{GlossarEntry, String, <:Function}} <: GlossarEntry
+struct Term{T <: Union{String, <:Function}} <: GlossarEntry
     properties::Dict{Symbol, T}
     function Term(
-            terms::Dict{Symbol, T} = Dict{Symbol, Union{GlossarEntry, String, <:Function}}()
-        ) where {T <: Union{GlossarEntry, String, <:Function}}
-        return new{T}(terms)
+            properties::Dict{Symbol, T} = Dict{Symbol, Union{String, <:Function}}()
+        ) where {T <: Union{String, <:Function}}
+        return new{T}(properties)
     end
 end
 function Term(name::String)
-    return Term(Dict{Symbol, Union{GlossarEntry, String, <:Function}}(:name => name))
+    return Term(Dict{Symbol, Union{String, <:Function}}(:name => name))
 end
 
 function Base.show(io::IO, term::Term)
@@ -206,4 +206,44 @@ Since this requires to call `@__MODULE__`, this is wrapped in a macro for conven
 """
 macro define!(args...)
     return esc(:(Glossaries.define!(@__MODULE__, $(args...))))
+end
+
+# Access to terms and Glossaries with getindex
+
+"""
+    getindex(glossary::Glossary, key::Symbol)
+    glossary[key::Symbol]
+
+Access the entry at `key` in the given [`Glossary`](@ref) `glossary`.
+"""
+function Base.getindex(glossary::Glossary, key::Symbol)
+    if haskey(glossary.terms, key)
+        return glossary.terms[key]
+    else
+        error("Key $(key) not found in glossary.")
+    end
+end
+
+function Base.setindex!(glossary::Glossary{T}, value::S, key::Symbol) where {T, S <: T}
+    glossary.terms[key] = value
+    return glossary
+end
+
+"""
+    getindex(term::Term, key::Symbol)
+    term[key::Symbol]
+
+Access the property `key` in the given [`Term`](@ref) `term`.
+"""
+function Base.getindex(term::Term, key::Symbol)
+    if haskey(term.properties, key)
+        return term.properties[key]
+    else
+        error("Key $(key) not found in term.")
+    end
+end
+
+function Base.setindex!(term::Term{P}, value::Q, key::Symbol) where {P, Q <: P}
+    term.properties[key] = value
+    return term
 end

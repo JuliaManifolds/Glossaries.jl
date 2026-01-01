@@ -1,6 +1,6 @@
 #
 #
-# Seach functionality
+# Search functionality
 
 """s
     search_in(glossary::Glossary{T}, query) where {T}
@@ -32,7 +32,7 @@ end
 """
     search_in(entry::Term, query::AbstractString)
 
-A small internal function to seach in a term. To match the glossary search interface,
+A small internal function to search in a term. To match the glossary search interface,
 this method returns a vector of length one containing the pair `(nothing, term)` if there is a match,
 otherwise an empty vector.
 """

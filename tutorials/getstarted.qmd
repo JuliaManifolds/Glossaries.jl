@@ -15,11 +15,83 @@ cd(@__DIR__)
 Pkg.activate("."); # for reproducibility use the local tutorial environment.
 ```
 
+## Introduction
+
+A [`Glossary`](@ref) is, according to [wikpedia/Flossay](https://en.wikipedia.org/wiki/Glossary)
+a list of ``[`Term`](@ref Glossaries.Term)``{=commonmark}s in some domain knowledge.
+The goal of this package is to easily define such glossaries but also to format or print
+certain terms or lists of terms.
+
+As a guiding example, consider the usual set of variables that appear in signatures of a package.
+In a documentation we would hence often repeat variable names, their types, maybe their default values, or their short description in a list of arguments or keywords.
+
+As a remedy one can define a glossary of common variables, but also terms, short definitions or remarks,
+that can then be reused.
+
 ## Starting a new Glossary
 
-To start a new glossary, you first need to create a `Glossary` object. This can be done by simply calling the constructor:
+To start a new glossary, you first need to create a [`Glossary`](@ref) object.
+This can be done by simply calling the constructor:
 
 ```{julia}
 using Glossaries
 g = Glossaries.Glossary()
 ```
+
+When working with just one Glossary, one can also use ``[`@Glossary`](@ref Glossaries.@Glossary)``{=commonmark}, which creates a
+``[`current_glossary`](@ref Glossaries.current_glossary)``{=commonmark} in the current module.
+Each ``[`Term`](@ref Glossaries.Term)``{=commonmark} within a Glossary consists of a list of properties. There are either
+Strings or functions returning strings to allow for a certain amount of parametrization.
+Terms within a Glossary are stored at a certain symbol.
+
+For our example, consider we have a recurring variable named `duck` of type `AbstractDuck`.
+
+We enter this for example as
+
+```{julia}
+Glossaries.define!(g, :duck, :name, "duck")
+Glossaries.define!(g, :duck, :type, "AbstractDuck")
+Glossaries.define!(g, :duck, :description, "A yellow duck")
+Glossaries.define!(g, :duck, :default, "[`YellowDuck`](@ref)`()`")
+```
+
+Again, you can also use ``[`@define!`](@ref Glossaries.@define!)``{=commonmark}`(:duck, ...)` to add entries to the glossary of the current module.
+
+We can also create a ``[`Term`](@ref Glossaries.Term)``{=commonmark} manually and add it to `g` afterwards.
+Since the name is a usual property, providing a string, sets the `:name`
+property.
+
+```{julia}
+t = Glossaries.Term("habitat")
+t[:type] = "AbstractHabitat"
+t[:description] = (var="duck") -> "A habitat of a `$var`"
+t[:default] = "Lake()"
+```
+
+As already mentioned, entries can also be functions. Here the description can be used to also specify that the habitat variable might refer to another arguments habitat than that of the duck.
+
+and we can add the term to the glossary either also by using `g[:habitat] = t` or with
+
+```{julia}
+Glossaries.define!(g, :habitat, t)
+```
+
+## Using a Glossary
+
+If we now have a function to check whether a certain duck fits into a habitat, e.g. `fits(duck, habitat)`, we can use a ``[`TermFormatter`](@ref Glossaries.TermFormatter)``{=commonmark} to generate its argument list.
+
+```{julia}
+_arg = Glossaries.Argument()
+_arg(g, [:duck, :habitat]) |> print
+```
+
+Again, using ``[`@Argument`](@ref Glossaries.Argument)``{=commonmark} allows to omit the first parameter, since that formatter would use the glossary of the current module.
+
+Similarly if we want to generate that for a function `something(; kwargs...)` where both are keyword arguments. We get using ``[`Keyword`](@ref Glossaries.Keyword)``{=commonmark}
+
+```{julia}
+_kw = Glossaries.Keyword()
+_kw(g, [:duck, :habitat]) |> print
+```
+
+note that in this format, the default is printed as well. Still, in both cases the information throughout multiple documentation strings is not only consistent, but if we had a typo, there is a single place to fix this, namely where we define the glossary terms.
