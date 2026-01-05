@@ -43,25 +43,8 @@ macro Glossary()
             const _CURRENT_GLOSSARY = Ref{Glossaries.Glossary}(Glossaries.Glossary())
             const _CURRENT_GLOSSARY_LOCK = Base.ReentrantLock()
 
-            """
-                current_glossary()
-
-            Returns the current active glossary (or the last glossary created).
-            Returns `nothing` if there is no current active glossary.
-
-            The access is thread-safe, since it also uses a lock.
-            """
             current_glossary() = lock(() -> _CURRENT_GLOSSARY[], _CURRENT_GLOSSARY_LOCK)
-
-            """
-                current_glossary!(glossary)
-
-            Set `glossary` as the current active glossary.
-
-            The access is thread-safe, since it also uses a lock.
-            """
             current_glossary!(glossary) = lock(() -> (_CURRENT_GLOSSARY[] = glossary), _CURRENT_GLOSSARY_LOCK)
-
             current_glossary()
         end
     )

@@ -23,4 +23,25 @@ include("search.jl")
 
 @Glossary()
 
+## Add doc strings for our variants here
+@doc """
+    current_glossary()
+
+Returns the current active glossary (or the last glossary created).
+Returns `nothing` if there is no current active glossary.
+
+The access is thread-safe, since it also uses a lock.
+"""
+current_glossary()
+
+@doc """
+    current_glossary!(glossary)
+
+Set `glossary` as the current active glossary.
+
+The access is thread-safe, since it also uses a lock.
+"""
+current_glossary!(glossary::Glossary)
+
+
 end # module Glossaries
