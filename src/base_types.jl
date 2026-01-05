@@ -30,17 +30,39 @@ Glossary() = Glossary(Dict{Symbol, GlossarEntry}())
 
 A macro to introduce a glossary in the current Module as well as access functions to these,
 such that one can easily work with the current active glossary in a thread-safe manner.
+
+!!! note
+
+    This macro should be called only once per module, since a second call would overwrite
+    the current active glossary in that module, which might cause even an error in Julia 1.11 or before.
 """
 macro Glossary()
     return esc(
         quote
             # Adapted from the idea in Makie.jl and their CURRENT_FIGURE
-            # but here defined in every module / name space separately
-            const _CURRENT_GLOSSARY = Ref{Union{Nothing, Glossaries.Glossary}}(nothing)
+            const _CURRENT_GLOSSARY = Ref{Glossaries.Glossary}(Glossaries.Glossary())
             const _CURRENT_GLOSSARY_LOCK = Base.ReentrantLock()
 
+            """
+                current_glossary()
+
+            Returns the current active glossary (or the last glossary created).
+            Returns `nothing` if there is no current active glossary.
+
+            The access is thread-safe, since it also uses a lock.
+            """
             current_glossary() = lock(() -> _CURRENT_GLOSSARY[], _CURRENT_GLOSSARY_LOCK)
+
+            """
+                current_glossary!(glossary)
+
+            Set `glossary` as the current active glossary.
+
+            The access is thread-safe, since it also uses a lock.
+            """
             current_glossary!(glossary) = lock(() -> (_CURRENT_GLOSSARY[] = glossary), _CURRENT_GLOSSARY_LOCK)
+
+            current_glossary()
         end
     )
 end

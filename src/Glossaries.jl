@@ -17,29 +17,10 @@ module Glossaries
 
 include("base_types.jl")
 
-function current_glossary end
-@doc """
-    current_glossary()
-
-Returns the current active glossary (or the last glossary created).
-Returns `nothing` if there is no current active glossary.
-
-The access is thread-safe, since it also uses a lock.
-"""
-current_glossary()
-
-function current_glossary! end
-@doc """
-    current_glossary!(glossary)
-
-Set `glossary` as the current active glossary.
-
-The access is thread-safe, since it also uses a lock.
-"""
-current_glossary!(glossary::Glossary)
-
 include("terms.jl")
 include("format.jl")
 include("search.jl")
+
+@Glossary()
 
 end # module Glossaries
