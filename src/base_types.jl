@@ -28,7 +28,7 @@ Glossary() = Glossary(Dict{Symbol, GlossarEntry}())
 """
     @Glossary
 
-A macro to introduce a glossary in the current Module as well as access functions to these,
+A macro to introduce a glossary in the current Module as well as access functions [`current_glossary`](@ref) and [`current_glossary!`](@ref),
 such that one can easily work with the current active glossary in a thread-safe manner.
 
 !!! note
