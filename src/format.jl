@@ -147,9 +147,10 @@ This formatter prints
 
 This format additionally accepts two keyword arguments, that are hence are hence not passed
 to the underlying term:
-* `name::String=""`: if given, this name is used instead of the term's `:name` property.
 * `add_properties::Vector{Symbol}=Symbol[]`: a vector of additional properties to add to the output
   after the description.
+* `name::String=""`: if given, this name is used instead of the term's `:name` property.
+* `type::String=""`: if given, this type is used instead of the term's `:type` property.
 
 All arguments and keyword arguments other than these are passed to the underlying property formatting,
 
@@ -178,11 +179,11 @@ macro Field(show_type = true)
 end
 
 # Functor for a term
-function (arg::Field)(term::Term, args...; name = "", add_properties::Vector{Symbol} = Symbol[], kwargs...)
+function (arg::Field)(term::Term, args...; name = "", type = "", add_properties::Vector{Symbol} = Symbol[], kwargs...)
     name = length(name) > 0 ? name : get(term.properties, :name, "")
     s = "- `$(name)`"
-    if haskey(term.properties, :type) && arg.show_type
-        s *= "::`[`$(_print(term, :type, args...; kwargs...))`](@ref)"
+    if (haskey(term.properties, :type) || length(type) > 0) && arg.show_type
+        s *= length(type) > 0 ? "::$(type)" : "::`[`$(_print(term, :type, args...; kwargs...))`](@ref)"
     else
         s *= "`"
     end
