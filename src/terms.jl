@@ -118,7 +118,7 @@ If a `Module` `wm` is given, the term is added to the current active glossary
 """
 
 @doc "$(_doc_define_entry)"
-define!(glossary::Glossary, key::Symbol, name::String = "") = define!(glossary, key, Term(name))
+define!(glossary::Glossary, key::Symbol, name::String = "$(key)") = define!(glossary, key, Term(name))
 
 @doc "$(_doc_define_entry)"
 function define!(glossary::Glossary{T}, key::Symbol, entry::S) where {T, S <: T}

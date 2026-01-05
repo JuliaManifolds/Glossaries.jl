@@ -77,7 +77,7 @@ Given a [`Term`](@ref), this formatter expects the following properties to be se
 
 This formatter prints
 ```
-* `name::[type](@ref): description`
+- `name::[type](@ref): description`
 ```
 
 # Fields
@@ -105,7 +105,58 @@ end
 
 # Functor for a term
 function (arg::Argument)(term::Term, args...; kwargs...)
-    s = "* `$(get(term.properties, :name, ""))"
+    s = "- `$(get(term.properties, :name, ""))"
+    if haskey(term.properties, :type) && arg.show_type
+        s *= "::`[`$(_print(term, :type, args...; kwargs...))`](@ref)"
+    else
+        s *= "`"
+    end
+    s *= ": $(_print(term, :description, args...; kwargs...))"
+    return s
+end
+
+
+"""
+    Field <: TermFormatter
+
+A format representing a struct field.
+
+Given a [`Term`](@ref), this formatter expects the following properties to be set:
+* `:name`: the name of the field
+* `:type`: the type of the field (optional)
+* `:description`: the description of the field
+
+This formatter prints
+```
+- `name::[type](@ref): description`
+```
+
+# Fields
+
+* `show_type::Bool`: whether to show the type of the argument
+
+# Constructor
+
+    Field(show_type::Bool = true)
+    @Field(show_type::Bool = true)
+
+Create a new `Field` formatter, where the macro variant takes the current modules glossary
+as default, see the different forms to call a formatter at [`TermFormatter`](@ref).
+"""
+struct Field{WM} <: TermFormatter{WM}
+    show_type::Bool
+end
+Field(show_type::Bool) = Field{Main}(show_type)
+Field(; show_type::Bool = true) = Field{Main}(show_type)
+Field{WM}(; show_type::Bool = true) where {WM} = Field{WM}(show_type)
+
+macro Field(show_type = true)
+    return esc(:(Glossaries.Field{@__MODULE__}($show_type)))
+end
+
+# Functor for a term
+function (arg::Field)(term::Term, args...; kwargs...)
+    s = "- `$(get(term.properties, :name, ""))"
     if haskey(term.properties, :type) && arg.show_type
         s *= "::`[`$(_print(term, :type, args...; kwargs...))`](@ref)"
     else
@@ -129,7 +180,7 @@ This formatter expects the following properties to be set:
 
 This formatter prints
 ```
-* `name::[type](@ref) = default`: description`
+- `name::[type](@ref) = default`: description`
 ```
 
 # Fields
@@ -157,7 +208,7 @@ end
 
 # Functor for a term
 function (kw::Keyword)(term::Term, args...; kwargs...)
-    s = "* `$(get(term.properties, :name, ""))"
+    s = "- `$(get(term.properties, :name, ""))"
     if haskey(term.properties, :type) && kw.show_type
         s *= "::`[`$(_print(term, :type, args...; kwargs...))`](@ref)"
     else
@@ -258,15 +309,17 @@ It then prints really just the name of the term.
 Create a new `Plain` formatter, where the macro variant takes the current modules glossary
 as default, see the different forms to call a formatter at [`TermFormatter`](@ref).
 """
-struct Plain{WM} <: TermFormatter{WM} end
-Plain() = Plain{Main}()
-Plain(m::Module) = Plain{m}()
+struct Plain{WM} <: TermFormatter{WM}
+    field::Symbol
+end
+Plain(s::Symbol = :name) = Plain{Main}(s)
+Plain(m::Module, s::Symbol = :name) = Plain{m}(s)
 
-macro Plain(show_type = true)
-    return esc(:(Glossaries.Plain{@__MODULE__}($show_type)))
+macro Plain(s::Symbol = :name)
+    return esc(:(Glossaries.Plain{@__MODULE__}($s)))
 end
 
 # Functor for a term
-function (::Plain)(term::Term, args...; kwargs...)
-    return get(term.properties, :name, "An unnamed term")
+function (p::Plain)(term::Term, args...; kwargs...)
+    return _print(term, p.field, args...; kwargs...)
 end
