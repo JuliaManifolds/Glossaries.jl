@@ -112,11 +112,11 @@ macro Argument(show_type = true)
 end
 
 # Functor for a term
-function (arg::Argument)(term::Term, args...; name = "", add_properties::Vector{Symbol} = Symbol[], kwargs...)
+function (arg::Argument)(term::Term, args...; name = "", type = "", add_properties::Vector{Symbol} = Symbol[], kwargs...)
     name = length(name) > 0 ? name : get(term.properties, :name, "")
     s = "- `$(name)"
-    if haskey(term.properties, :type) && arg.show_type
-        s *= "::`[`$(_print(term, :type, args...; kwargs...))`](@ref)"
+    if (haskey(term.properties, :type) || length(type) > 0) && arg.show_type
+        s *= length(type) > 0 ? "::$(type)`" : "::$(_print(term, :type, args...; kwargs...))`"
     else
         s *= "`"
     end
@@ -179,11 +179,11 @@ macro Field(show_type = true)
 end
 
 # Functor for a term
-function (arg::Field)(term::Term, args...; name = "", type = "", add_properties::Vector{Symbol} = Symbol[], kwargs...)
+function (field::Field)(term::Term, args...; name = "", type = "", add_properties::Vector{Symbol} = Symbol[], kwargs...)
     name = length(name) > 0 ? name : get(term.properties, :name, "")
     s = "- `$(name)"
-    if (haskey(term.properties, :type) || length(type) > 0) && arg.show_type
-        s *= length(type) > 0 ? "::$(type)" : "::`[`$(_print(term, :type, args...; kwargs...))`](@ref)"
+    if (haskey(term.properties, :type) || length(type) > 0) && field.show_type
+        s *= length(type) > 0 ? "::$(type)`" : "::$(_print(term, :type, args...; kwargs...))`"
     else
         s *= "`"
     end
@@ -246,11 +246,11 @@ macro Keyword(show_type = true)
 end
 
 # Functor for a term
-function (kw::Keyword)(term::Term, args...; default = "", name = "", add_properties::Vector{Symbol} = Symbol[], kwargs...)
+function (kw::Keyword)(term::Term, args...; default = "", name = "", type = "", add_properties::Vector{Symbol} = Symbol[], kwargs...)
     name = length(name) > 0 ? name : get(term.properties, :name, "")
     s = "- `$(name)"
-    if haskey(term.properties, :type) && kw.show_type
-        s *= "::`[`$(_print(term, :type, args...; kwargs...))`](@ref)"
+    if (haskey(term.properties, :type) || length(type) > 0) && kw.show_type
+        s *= length(type) > 0 ? "::$(type)`" : "::$(_print(term, :type, args...; kwargs...))`"
     else
         s *= "`"
     end
