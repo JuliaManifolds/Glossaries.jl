@@ -80,6 +80,14 @@ This formatter prints
 - `name::[type](@ref): description`
 ```
 
+This format additionally accepts two keyword arguments, that are hence are hence not passed
+to the underlying term:
+* `display_name::String=""`: if given, this name is used instead of the term's `:name` property.
+* `add_properties::Vector{Symbol}=Symbol[]`: a vector of additional properties to add to the output
+  after the description.
+
+All arguments and keyword arguments other than these are passed to the underlying property formatting,
+
 # Fields
 
 * `show_type::Bool`: whether to show the type of the argument
@@ -104,14 +112,20 @@ macro Argument(show_type = true)
 end
 
 # Functor for a term
-function (arg::Argument)(term::Term, args...; kwargs...)
-    s = "- `$(get(term.properties, :name, ""))"
+function (arg::Argument)(term::Term, args...; different_name = "", add_properties::Vector{Symbol} = Symbol[], kwargs...)
+    name = length(different_name) > 0 ? different_name : get(term.properties, :name, "")
+    s = "- `$(name)`"
     if haskey(term.properties, :type) && arg.show_type
         s *= "::`[`$(_print(term, :type, args...; kwargs...))`](@ref)"
     else
         s *= "`"
     end
     s *= ": $(_print(term, :description, args...; kwargs...))"
+    for p in add_properties
+        if haskey(term.properties, p)
+            s *= " $(_print(term, p, args...; kwargs...))"
+        end
+    end
     return s
 end
 
@@ -130,6 +144,15 @@ This formatter prints
 ```
 - `name::[type](@ref): description`
 ```
+
+This format additionally accepts two keyword arguments, that are hence are hence not passed
+to the underlying term:
+* `display_name::String=""`: if given, this name is used instead of the term's `:name` property.
+* `add_properties::Vector{Symbol}=Symbol[]`: a vector of additional properties to add to the output
+  after the description.
+
+All arguments and keyword arguments other than these are passed to the underlying property formatting,
+
 
 # Fields
 
@@ -155,14 +178,20 @@ macro Field(show_type = true)
 end
 
 # Functor for a term
-function (arg::Field)(term::Term, args...; kwargs...)
-    s = "- `$(get(term.properties, :name, ""))"
+function (arg::Field)(term::Term, args...; different_name = "", add_properties::Vector{Symbol} = Symbol[], kwargs...)
+    name = length(different_name) > 0 ? different_name : get(term.properties, :name, "")
+    s = "- `$(name)`"
     if haskey(term.properties, :type) && arg.show_type
         s *= "::`[`$(_print(term, :type, args...; kwargs...))`](@ref)"
     else
         s *= "`"
     end
     s *= ": $(_print(term, :description, args...; kwargs...))"
+    for p in add_properties
+        if haskey(term.properties, p)
+            s *= " $(_print(term, p, args...; kwargs...))"
+        end
+    end
     return s
 end
 
@@ -182,6 +211,14 @@ This formatter prints
 ```
 - `name::[type](@ref) = default`: description`
 ```
+
+This format additionally accepts two keyword arguments, that are hence are hence not passed
+to the underlying term:
+* `display_name::String=""`: if given, this name is used instead of the term's `:name` property.
+* `add_properties::Vector{Symbol}=Symbol[]`: a vector of additional properties to add to the output
+  after the description.
+
+All arguments and keyword arguments other than these are passed to the underlying property formatting,
 
 # Fields
 * `show_type::Bool`: whether to show the type of the keyword argument
@@ -207,8 +244,9 @@ macro Keyword(show_type = true)
 end
 
 # Functor for a term
-function (kw::Keyword)(term::Term, args...; kwargs...)
-    s = "- `$(get(term.properties, :name, ""))"
+function (kw::Keyword)(term::Term, args...; different_name = "", add_properties::Vector{Symbol} = Symbol[], kwargs...)
+    name = length(different_name) > 0 ? different_name : get(term.properties, :name, "")
+    s = "- `$(name)`"
     if haskey(term.properties, :type) && kw.show_type
         s *= "::`[`$(_print(term, :type, args...; kwargs...))`](@ref)"
     else
@@ -217,6 +255,11 @@ function (kw::Keyword)(term::Term, args...; kwargs...)
     df = get(term.properties, :default, "")
     length(df) > 0 && (s *= "` = $(df)`")
     s *= ": $(_print(term, :description, args...; kwargs...))"
+    for p in add_properties
+        if haskey(term.properties, p)
+            s *= " $(_print(term, p, args...; kwargs...))"
+        end
+    end
     return s
 end
 
