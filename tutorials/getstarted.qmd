@@ -17,7 +17,7 @@ Pkg.activate("."); # for reproducibility use the local tutorial environment.
 
 ## Introduction
 
-A [`Glossary`](@ref) is, according to [wikpedia/Flossay](https://en.wikipedia.org/wiki/Glossary)
+A [`Glossary`](@ref) is, according to [Wikpedia](https://en.wikipedia.org/wiki/Glossary),
 a list of ``[`Term`](@ref Glossaries.Term)``{=commonmark}s in some domain knowledge.
 The goal of this package is to easily define such glossaries but also to format or print
 certain terms or lists of terms.
