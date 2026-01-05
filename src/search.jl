@@ -2,7 +2,7 @@
 #
 # Search functionality
 
-"""s
+"""
     search_in(glossary::Glossary{T}, query) where {T}
 
 Search for a `query` string in all terms/entries of a Glossary.
