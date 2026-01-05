@@ -254,7 +254,7 @@ function (kw::Keyword)(term::Term, args...; default = "", name = "", add_propert
     else
         s *= "`"
     end
-    df = length(default) > 0 ? default : get(term.properties, :default, "")
+    df = length(default) > 0 ? default : _print(term, :default, args...; kwargs...)
     length(df) > 0 && (s *= "` = $(df)`")
     s *= ": $(_print(term, :description, args...; kwargs...))"
     for p in add_properties
