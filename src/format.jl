@@ -82,7 +82,7 @@ This formatter prints
 
 This format additionally accepts two keyword arguments, that are hence are hence not passed
 to the underlying term:
-* `display_name::String=""`: if given, this name is used instead of the term's `:name` property.
+* `name::String=""`: if given, this name is used instead of the term's `:name` property.
 * `add_properties::Vector{Symbol}=Symbol[]`: a vector of additional properties to add to the output
   after the description.
 
@@ -112,8 +112,8 @@ macro Argument(show_type = true)
 end
 
 # Functor for a term
-function (arg::Argument)(term::Term, args...; different_name = "", add_properties::Vector{Symbol} = Symbol[], kwargs...)
-    name = length(different_name) > 0 ? different_name : get(term.properties, :name, "")
+function (arg::Argument)(term::Term, args...; name = "", add_properties::Vector{Symbol} = Symbol[], kwargs...)
+    name = length(name) > 0 ? name : get(term.properties, :name, "")
     s = "- `$(name)`"
     if haskey(term.properties, :type) && arg.show_type
         s *= "::`[`$(_print(term, :type, args...; kwargs...))`](@ref)"
@@ -147,7 +147,7 @@ This formatter prints
 
 This format additionally accepts two keyword arguments, that are hence are hence not passed
 to the underlying term:
-* `display_name::String=""`: if given, this name is used instead of the term's `:name` property.
+* `name::String=""`: if given, this name is used instead of the term's `:name` property.
 * `add_properties::Vector{Symbol}=Symbol[]`: a vector of additional properties to add to the output
   after the description.
 
@@ -178,8 +178,8 @@ macro Field(show_type = true)
 end
 
 # Functor for a term
-function (arg::Field)(term::Term, args...; different_name = "", add_properties::Vector{Symbol} = Symbol[], kwargs...)
-    name = length(different_name) > 0 ? different_name : get(term.properties, :name, "")
+function (arg::Field)(term::Term, args...; name = "", add_properties::Vector{Symbol} = Symbol[], kwargs...)
+    name = length(name) > 0 ? name : get(term.properties, :name, "")
     s = "- `$(name)`"
     if haskey(term.properties, :type) && arg.show_type
         s *= "::`[`$(_print(term, :type, args...; kwargs...))`](@ref)"
@@ -214,9 +214,10 @@ This formatter prints
 
 This format additionally accepts two keyword arguments, that are hence are hence not passed
 to the underlying term:
-* `display_name::String=""`: if given, this name is used instead of the term's `:name` property.
+* `name::String=""`: if given, this name is used instead of the term's `:name` property.
 * `add_properties::Vector{Symbol}=Symbol[]`: a vector of additional properties to add to the output
   after the description.
+* `default::String=""`: the default value to use instead of the stored `:default` property.
 
 All arguments and keyword arguments other than these are passed to the underlying property formatting,
 
@@ -244,15 +245,15 @@ macro Keyword(show_type = true)
 end
 
 # Functor for a term
-function (kw::Keyword)(term::Term, args...; different_name = "", add_properties::Vector{Symbol} = Symbol[], kwargs...)
-    name = length(different_name) > 0 ? different_name : get(term.properties, :name, "")
+function (kw::Keyword)(term::Term, args...; default = "", name = "", add_properties::Vector{Symbol} = Symbol[], kwargs...)
+    name = length(name) > 0 ? name : get(term.properties, :name, "")
     s = "- `$(name)`"
     if haskey(term.properties, :type) && kw.show_type
         s *= "::`[`$(_print(term, :type, args...; kwargs...))`](@ref)"
     else
         s *= "`"
     end
-    df = get(term.properties, :default, "")
+    df = length(default) > 0 ? default : get(term.properties, :default, "")
     length(df) > 0 && (s *= "` = $(df)`")
     s *= ": $(_print(term, :description, args...; kwargs...))"
     for p in add_properties
