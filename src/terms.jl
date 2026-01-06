@@ -217,11 +217,8 @@ end
 Access the entry at `key` in the given [`Glossary`](@ref) `glossary`.
 """
 function Base.getindex(glossary::Glossary, key::Symbol)
-    if haskey(glossary.terms, key)
-        return glossary.terms[key]
-    else
-        error("Key $(key) not found in glossary.")
-    end
+    !haskey(glossary.terms, key) && throw(KeyError(key))
+    return glossary.terms[key]
 end
 
 function Base.setindex!(glossary::Glossary{T}, value::S, key::Symbol) where {T, S <: T}
@@ -236,11 +233,8 @@ end
 Access the property `key` in the given [`Term`](@ref) `term`.
 """
 function Base.getindex(term::Term, key::Symbol)
-    if haskey(term.properties, key)
-        return term.properties[key]
-    else
-        error("Key $(key) not found in term.")
-    end
+    !haskey(term.properties, key) && throw(KeyError(key))
+    return term.properties[key]
 end
 
 function Base.setindex!(term::Term{P}, value::Q, key::Symbol) where {P, Q <: P}

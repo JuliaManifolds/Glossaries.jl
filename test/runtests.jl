@@ -14,7 +14,9 @@ g = Glossaries.@Glossary()
         Glossaries.add!(t, :description, "a Riemannian manifold")
         Glossaries.add!(t, :default, (; n = 2) -> "Sphere($n)")
         Glossaries.add!(t, :math, raw"\mathcal M")
-        Glossaries.add!(t, :note, " (finite dimensional)")
+        t[:note] = " (finite dimensional)"
+        @test t[:note] isa String
+        @test_throws KeyError t[:unknown_property]
 
         s = repr(t)
         @test contains(s, ":default")
@@ -25,6 +27,8 @@ g = Glossaries.@Glossary()
 
         arg = Glossaries.@Argument(true)
         @test Glossaries.Argument{Main}() === arg
+        @test Glossaries.Argument(; show_type = true) === arg
+        @test Glossaries.Argument(true) === arg
         s2 = arg(t)
         # * `manifold::AbstractManifold`:  a Riemannian manifold
         @test contains(s2, "`manifold::AbstractManifold`")
@@ -33,6 +37,7 @@ g = Glossaries.@Glossary()
 
         fld = Glossaries.@Field()
         @test Glossaries.Field{Main}() === fld
+        @test Glossaries.Field(true) === fld
         @test Glossaries.Field() === fld
         s4 = fld(t)
         # * `manifold::AbstractManifold`:  a Riemannian manifold
@@ -99,5 +104,7 @@ g = Glossaries.@Glossary()
         Glossaries.@define!(:beta, :description, "second letter of the Greek alphabet")
         Glossaries.@define!(:frakg, :math, raw"\mathfrak{g}")
         @test length(g2("Greek")) == 2
+        @test_throws KeyError g2[:empty]
+        g2[:gamma] = Glossaries.Term("gamma")
     end
 end

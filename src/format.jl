@@ -246,7 +246,6 @@ end
 Keyword(show_type::Bool) = Keyword{Main}(show_type)
 Keyword(; show_type::Bool = true) = Keyword(show_type)
 Keyword{WM}(; show_type::Bool = true) where {WM} = Keyword{WM}(show_type)
-Keyword(m::Module; show_type::Bool = true) = Keyword{m}(show_type)
 
 macro Keyword(show_type = true)
     return esc(:(Glossaries.Keyword{@__MODULE__}($show_type)))
