@@ -255,14 +255,12 @@ end
 # Functor for a term
 function (kw::Keyword)(term::Term, args...; default = "", name = "", type = "", add_properties::Vector{Symbol} = Symbol[], kwargs...)
     name = length(name) > 0 ? name : get(term.properties, :name, "")
+    df = length(default) > 0 ? default : _print(term, :default, args...; kwargs...)
     s = "- `$(name)"
     if (haskey(term.properties, :type) || length(type) > 0) && kw.show_type
-        s *= length(type) > 0 ? "::$(type)`" : "::$(_print(term, :type, args...; kwargs...))`"
-    else
-        s *= "`"
+        s *= length(type) > 0 ? "::$(type)`" : "::$(_print(term, :type, args...; kwargs...))"
     end
-    df = length(default) > 0 ? default : _print(term, :default, args...; kwargs...)
-    length(df) > 0 && (s *= "` = $(df)`")
+    s *= length(df) > 0 ? " = $(df)`" : "`"
     s *= ": $(_print(term, :description, args...; kwargs...))"
     for p in add_properties
         if haskey(term.properties, p)
