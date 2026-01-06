@@ -12,7 +12,7 @@ g = Glossaries.@Glossary()
         t = Glossaries.Term("manifold")
         Glossaries.add!(t, :type, "AbstractManifold")
         Glossaries.add!(t, :description, "a Riemannian manifold")
-        Glossaries.add!(t, :default, (; n=2) -> "Sphere($n)")
+        Glossaries.add!(t, :default, (; n = 2) -> "Sphere($n)")
         Glossaries.add!(t, :math, raw"\mathcal M")
         Glossaries.add!(t, :note, " (finite dimensional)")
 
@@ -87,7 +87,7 @@ g = Glossaries.@Glossary()
         @test contains(s9, ":manifold")
         @test contains(s9, ":pkg_name")
         @test contains(s9, "Glossary with 2 terms")
-        s10 =  Glossaries._print(g; n=3)
+        s10 = Glossaries._print(g; n = 3)
         @test contains(s10, "Sphere(3)")
     end
     @testset "Search and replace" begin
