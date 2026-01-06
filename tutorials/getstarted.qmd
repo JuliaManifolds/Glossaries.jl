@@ -52,8 +52,10 @@ We enter this for example as
 Glossaries.define!(g, :duck, :name, "duck")
 Glossaries.define!(g, :duck, :type, "AbstractDuck")
 Glossaries.define!(g, :duck, :description, "A yellow duck")
-Glossaries.define!(g, :duck, :default, "[`YellowDuck`](@ref)`()`")
+Glossaries.define!(g, :duck, :default, "`[`YellowDuck`](@ref)`()")
 ```
+
+Note that since the type and the default are considered to be typeset in code, we have to start the default with ending a code block before adding the `@ref` markdown link.
 
 Again, you can also use ``[`@define!`](@ref Glossaries.@define!)``{=commonmark}`(:duck, ...)` to add entries to the glossary of the current module.
 
