@@ -76,9 +76,12 @@ Given a [`Term`](@ref), this formatter expects the following properties to be se
 * `:description`: the description of the argument
 
 This formatter prints
+
 ```
-- `name::[type](@ref): description`
+- `name::type`: description
 ```
+
+Note that both the name and the type are set in code formatting.
 
 This format additionally accepts two keyword arguments, that are hence are hence not passed
 to the underlying term:
@@ -142,8 +145,10 @@ Given a [`Term`](@ref), this formatter expects the following properties to be se
 
 This formatter prints
 ```
-- `name::[type](@ref): description`
+- `name::type`: description
 ```
+
+Note that both the name and the type are set in code formatting.
 
 This format additionally accepts two keyword arguments, that are hence are hence not passed
 to the underlying term:
@@ -210,8 +215,10 @@ This formatter expects the following properties to be set:
 
 This formatter prints
 ```
-- `name::[type](@ref) = default`: description`
+- `name::type = default`: description
 ```
+
+Note that the name, the type and the default are set in code formatting.
 
 This format additionally accepts two keyword arguments, that are hence are hence not passed
 to the underlying term:
