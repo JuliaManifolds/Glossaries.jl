@@ -285,7 +285,6 @@ as default, see the different forms to call a formatter at [`TermFormatter`](@re
 """
 struct Math{WM} <: TermFormatter{WM} end
 Math() = Math{Main}()
-Math(m::Module) = Math{m}()
 
 macro Math(show_type = true)
     return esc(:(Glossaries.Math{@__MODULE__}($show_type)))
@@ -331,9 +330,8 @@ as default, see the different forms to call a formatter at [`TermFormatter`](@re
 struct MathTerm{WM} <: TermFormatter{WM}
     delimiter::String
 end
-MathTerm() = MathTerm{Main}()
+MathTerm(delimiter = "``") = MathTerm{Main}(delimiter)
 MathTerm{MW}() where {MW} = MathTerm{MW}("``")
-MathTerm(m::Module) = MathTerm{m}()
 
 macro MathTerm(show_type = true)
     return esc(:(Glossaries.MathTerm{@__MODULE__}($show_type)))
@@ -363,10 +361,10 @@ struct Plain{WM} <: TermFormatter{WM}
     field::Symbol
 end
 Plain(s::Symbol = :name) = Plain{Main}(s)
-Plain(m::Module, s::Symbol = :name) = Plain{m}(s)
+Plain{MW}() where {MW} = Plain{MW}(:name)
 
 macro Plain(s::Symbol = :name)
-    return esc(:(Glossaries.Plain{@__MODULE__}($s)))
+    return esc(:(Glossaries.Plain{@__MODULE__}(Symbol($(QuoteNode(s))))))
 end
 
 # Functor for a term
