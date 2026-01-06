@@ -12,7 +12,7 @@ g = Glossaries.@Glossary()
         t = Glossaries.Term("manifold")
         Glossaries.add!(t, :type, "AbstractManifold")
         Glossaries.add!(t, :description, "a Riemannian manifold")
-        Glossaries.add!(t, :default, "Sphere(2)")
+        Glossaries.add!(t, :default, (; n=2) -> "Sphere($n)")
         Glossaries.add!(t, :math, raw"\mathcal M")
         Glossaries.add!(t, :note, " (finite dimensional)")
 
@@ -34,41 +34,41 @@ g = Glossaries.@Glossary()
         fld = Glossaries.@Field()
         @test Glossaries.Field{Main}() === fld
         @test Glossaries.Field() === fld
-        s3 = fld(t)
+        s4 = fld(t)
         # * `manifold::AbstractManifold`:  a Riemannian manifold
-        @test contains(s3, "`manifold::AbstractManifold`")
-        @test contains(s3, "a Riemannian manifold")
+        @test contains(s4, "`manifold::AbstractManifold`")
+        @test contains(s4, "a Riemannian manifold")
         @test contains(fld(t; add_properties = [:note]), " (finite dimensional)")
 
         kw = Glossaries.@Keyword()
         @test Glossaries.Keyword(true) === kw
         @test Glossaries.Keyword{Main}() === kw
         @test Glossaries.Keyword(; show_type = true) === kw
-        s3 = kw(t)
+        s4 = kw(t)
         # * `manifold::AbstractManifold = Sphere(2)`:  a Riemannian manifold
-        @test contains(s3, "`manifold::AbstractManifold = Sphere(2)`")
-        @test contains(s3, "a Riemannian manifold")
+        @test contains(s4, "`manifold::AbstractManifold = Sphere(2)`")
+        @test contains(s4, "a Riemannian manifold")
         @test contains(kw(t; add_properties = [:note]), " (finite dimensional)")
 
         p = Glossaries.@Plain()
         @test Glossaries.Plain() === p
         @test Glossaries.Plain{Main}() === p
-        s4 = p(t)
+        s5 = p(t)
         # just prints the name
-        @test s4 == "manifold"
+        @test s5 == "manifold"
 
         m = Glossaries.Math()
         @test Glossaries.Math{Main}() === m
-        s5 = m(t)
+        s6 = m(t)
         # \mathcal M
-        @test contains(s5, raw"\mathcal M")
+        @test contains(s6, raw"\mathcal M")
 
         mt = Glossaries.MathTerm()
         @test Glossaries.MathTerm{Main}() === mt
-        s6 = mt(t)
+        s7 = mt(t)
         # a Riemannian manifold ``\mathcal M``
-        @test contains(s6, "a Riemannian manifold")
-        @test contains(s6, raw"``\mathcal M``")
+        @test contains(s7, "a Riemannian manifold")
+        @test contains(s7, raw"``\mathcal M``")
 
         # Define in (current/new) glossary
         g = Glossaries.@define!(:manifold, t)
@@ -78,14 +78,21 @@ g = Glossaries.@Glossary()
         @test arg(:manifold) == arg(t)
         arg(:manifold) # prints the same as above, since we added t to the current glossary
         # List both entries as a list, where Glossaries is printed without type, since we did not set it
-        s7 = arg()
-        @test contains(s7, "`manifold::AbstractManifold`")
+        s8 = arg()
+        @test contains(s8, "`manifold::AbstractManifold`")
         @test_logs (:warn,) arg(:A)
         @test_logs (:warn,) arg([:A, :manifold])
+
+        s9 = repr(g)
+        @test contains(s9, ":manifold")
+        @test contains(s9, ":pkg_name")
+        @test contains(s9, "Glossary with 2 terms")
+        s10 =  Glossaries._print(g; n=3)
+        @test contains(s10, "Sphere(3)")
     end
     @testset "Search and replace" begin
         g2 = Glossaries.Glossary()
-        current_glossary!(g2)
+        Glossaries.define!(Main, g2)
         Glossaries.@define!(:alpha, :math, raw"\alpha")
         Glossaries.@define!(:alpha, :description, "first letter of the Greek alphabet")
         Glossaries.@define!(:beta, :math, raw"\beta")

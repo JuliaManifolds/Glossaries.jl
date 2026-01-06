@@ -81,7 +81,7 @@ function Base.show(io::IO, glossary::Glossary)
     return _print(io, glossary)
 end
 
-function _print(io, glossary::Glossary)
+function _print(io::IO, glossary::Glossary)
     length(glossary.terms) == 0 && return print(io, "An Empty Glossary")
     s = "Glossary with $(length(glossary.terms)) terms:"
     for (k, v) in glossary.terms
@@ -102,7 +102,7 @@ function _print(glossary::Glossary, args...; kwargs...)
         w = replace(_print(v, args...; kwargs...), '\n' => "\n\t")
         s *= "\n* :$(k)\t$(w)"
     end
-    return print(io, s)
+    return s
 end
 
 _doc_define_entry = """
