@@ -15,6 +15,7 @@ function search_in(glossary::Glossary{T}, query) where {T}
     results = Pair{Union{Nothing, Symbol, Vector{Symbol}}, T}[]
 
     for (key, entry) in glossary.terms
+        entry === glossary && continue # avoid recursion on self-reference
         local_results = search_in(entry, query)
         for result in local_results
             if isnothing(result.first) # we have a direct hit in a term of this glossary

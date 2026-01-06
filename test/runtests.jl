@@ -44,6 +44,7 @@ g = Glossaries.@Glossary()
         @test contains(s4, "`manifold::AbstractManifold`")
         @test contains(s4, "a Riemannian manifold")
         @test contains(fld(t; add_properties = [:note]), " (finite dimensional)")
+        @test !contains(fld(Glossaries.Term("A")), "::")
 
         kw = Glossaries.@Keyword()
         @test Glossaries.Keyword(true) === kw
@@ -105,6 +106,13 @@ g = Glossaries.@Glossary()
         Glossaries.@define!(:frakg, :math, raw"\mathfrak{g}")
         @test length(g2("Greek")) == 2
         @test_throws KeyError g2[:empty]
-        g2[:gamma] = Glossaries.Term("gamma")
+        g2[:sub] = Glossaries.Glossary()
+        g2[:sub][:A] = Glossaries.Term("A")
+        g2[:self_ref] = g2
+        @test contains(repr(g2), "recursive reference")
+        @test g2("A")[1].first == [:sub, :A]
+        g2[:sub][:sub] = Glossaries.Glossary()
+        g2[:sub][:sub][:B] = Glossaries.Term("B")
+        @test g2("B")[1].first == [:sub, :sub, :B]
     end
 end
