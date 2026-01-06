@@ -112,7 +112,7 @@ g = Glossaries.@Glossary()
         @test contains(repr(g2), "recursive reference")
         @test g2("A")[1].first == [:sub, :A]
         g2[:sub][:sub] = Glossaries.Glossary()
-        g2[:sub][:sub][:B] = Glossaries.Term("B")
+        Glossaries.define!(g2, :sub, :sub, :B, Glossaries.Term("B"))
         @test g2("B")[1].first == [:sub, :sub, :B]
     end
 end

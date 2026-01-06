@@ -128,10 +128,7 @@ end
 @doc "$(_doc_define_entry)"
 function define!(wm::Module, key::Symbol, name::String = "")
     glossary = wm.current_glossary()
-    if isnothing(glossary)
-        glossary = Glossary()
-        define!(wm, glossary)
-    end
+    isnothing(glossary) && (glossary = define!(wm, Glossary()))
     define!(glossary, key, name)
     return glossary
 end
@@ -140,10 +137,7 @@ function define!(wm::Module, key::Symbol, term::S) where {S <: GlossarEntry}
     glossary = wm.current_glossary()
     # if we do not have a glossary yet, or the term is the glossary itself:
     # (here in the implicit case, avoid recursion, this has to be done explicitly)
-    if isnothing(glossary) || (term === glossary)
-        glossary = Glossary()
-        define!(wm, glossary)
-    end
+    (isnothing(glossary) || (term === glossary)) && (glossary = define!(wm, Glossary()))
     define!(glossary, key, term)
     return glossary
 end
@@ -184,10 +178,7 @@ end
 @doc "$(_doc_define_prop)"
 function define!(wm::Module, entry::Symbol, property::Symbol, args...)
     glossary = wm.current_glossary()
-    if isnothing(glossary)
-        glossary = Glossary()
-        define!(wm, glossary)
-    end
+    isnothing(glossary) && (glossary = define!(wm, Glossary()))
     define!(glossary, entry, property, args...)
     return glossary
 end
