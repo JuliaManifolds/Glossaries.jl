@@ -6,3 +6,8 @@ Glossaries = "8f48dd54-e453-4cdc-9500-53b96149560b"
 
 [sources]
 Glossaries = {path = ".."}
+
+[compat]
+Documenter = "1.16.1"
+DocumenterCitations = "1.4.1"
+DocumenterInterLinks = "1.1.0"
