@@ -1,5 +1,6 @@
 """
-    Glossaries.jl
+🗃️ Glossaries.jl – manage a glossary for arguments, keywords and other snippets and terms for
+  the documentation of your Julia package.
 
 A Julia package for managing glossaries of terms, including their metadata,
 for example their mathematical notation.
@@ -16,37 +17,31 @@ module Glossaries
 
 include("base_types.jl")
 
-macro Glossary()
-    return esc(
-        quote
-            # Adapted from the idea in Makie.jl and their CURRENT_FIGURE
-            const _CURRENT_GLOSSARY = Ref{Union{Nothing, Glossaries.Glossary}}(nothing)
-            const _CURRENT_GLOSSARY_LOCK = Base.ReentrantLock()
-
-            """
-                current_glossary()
-
-            Returns the current active glossary (or the last glossary created).
-            Returns `nothing` if there is no current active glossary.
-
-            The access is thread-safe, since it also uses a lock.
-            """
-            current_glossary() = lock(() -> _CURRENT_GLOSSARY[], _CURRENT_GLOSSARY_LOCK)
-
-            """
-                current_glossary!(glossary)
-
-            Set `glossary` as the current active glossary.
-
-            The access is thread-safe, since it also uses a lock.
-            """
-            current_glossary!(glossary) = lock(() -> (_CURRENT_GLOSSARY[] = glossary), _CURRENT_GLOSSARY_LOCK)
-        end
-    )
-end
-
 include("terms.jl")
 include("format.jl")
 include("search.jl")
+
+@Glossary()
+
+## Add doc strings for our variants here
+@doc """
+    current_glossary()
+
+Returns the current active glossary (or the last glossary created).
+Returns `nothing` if there is no current active glossary.
+
+The access is thread-safe, since it also uses a lock.
+"""
+current_glossary()
+
+@doc """
+    current_glossary!(glossary)
+
+Set `glossary` as the current active glossary.
+
+The access is thread-safe, since it also uses a lock.
+"""
+current_glossary!(glossary::Glossary)
+
 
 end # module Glossaries

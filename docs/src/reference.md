@@ -12,7 +12,7 @@ Pages = ["base_types.jl"]
 ```@autodocs
 Modules = [Glossaries]
 Pages = ["terms.jl"]
-Order = [:type, :function]
+Order = [:type, :function, :macro]
 ```
 
 ### Search

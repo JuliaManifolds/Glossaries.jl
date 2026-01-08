@@ -2,3 +2,6 @@ docs/build
 docs/src/news.md
 docs/Manifest.toml
 test/Manifest.toml
+docs/src/tutorials/*.md
+tutorials/_freeze
+Manifest.toml
