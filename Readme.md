@@ -7,3 +7,13 @@
 [![codecov.io](http://codecov.io/github/JuliaManifolds/Glossaries.jl/coverage.svg?branch=main)](https://codecov.io/gh/JuliaManifolds/Glossaries.jl/)
 
 Keep track of terms and their definitions in Julia projects, and reuse them in documenting variables, keywords, and more.
+
+## Getting started
+
+In Julia you can get started by just typing
+
+```julia
+using Pkg; Pkg.add("Glossaries");
+```
+
+and then checkout the [Get Started with Glossaries.jl](https://juliamanifolds.github.io/Glossaries.jl/stable/tutorials/getstarted/) tutorial.
