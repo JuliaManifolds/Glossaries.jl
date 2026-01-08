@@ -3,15 +3,15 @@
 
 A format for glossary terms. It always acts as a functor with the following methods:
 
-    (tf::TermFormatter)(keys::Vector{Symbol}; kwargs...)`
-    (tf::TermFormatter)(glossary::Glossary, keys::Vector{Symbol}; kwargs...)`
+    (tf::TermFormatter)(keys::Vector{Symbol}; kwargs...)
+    (tf::TermFormatter)(glossary::Glossary, keys::Vector{Symbol}; kwargs...)
 
 format all given `keys` of a `glossary` using the format `tf`.
 If the `glossary` is not given, the [`current_glossary`](@ref) is used,
 if no `keys` are given, all keys of the glossary are used.
 
-    (tf::TermFormatter)(key::Symbol, args...; kwargs...)`
-    (tf::TermFormatter)(glossary::Glossary, key::Symbol, args...; kwargs...)`
+    (tf::TermFormatter)(key::Symbol, args...; kwargs...)
+    (tf::TermFormatter)(glossary::Glossary, key::Symbol, args...; kwargs...)
 
 format the given `key` of a `glossary` using the format `tf`.
 If the `glossary` is not given, the [`current_glossary`](@ref) is used.
