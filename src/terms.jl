@@ -62,8 +62,6 @@ end
 _print(v::String, args...; kwargs...) = v
 function _print(v::Function, args...; kwargs...)
     # estimate from first function method
-    m = methods(v)[1]
-    (m.nargs != (length(args) + 1)) && return "$(v)"
     return v(args...; kwargs...)
 end
 
