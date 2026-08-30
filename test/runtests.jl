@@ -55,6 +55,10 @@ g = Glossaries.@Glossary()
         @test contains(s4, "`manifold::AbstractManifold = Sphere(2)`")
         @test contains(s4, "a Riemannian manifold")
         @test contains(kw(t; add_properties = [:note]), " (finite dimensional)")
+        # a custom `type` leaves the code span open, so ` = default` stays in code
+        s4b = kw(t; type = "Union{`[`A`](@ref)`, Missing}", default = "missing")
+        @test contains(s4b, "`manifold::Union{`[`A`](@ref)`, Missing} = missing`")
+        @test iseven(count(==('`'), s4b))
 
         p = Glossaries.@Plain()
         @test Glossaries.Plain() === p

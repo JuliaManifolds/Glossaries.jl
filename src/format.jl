@@ -257,7 +257,7 @@ function (kw::Keyword)(term::Term, args...; default = "", name = "", type = "", 
     df = length(default) > 0 ? default : _print(term, :default, args...; kwargs...)
     s = "- `$(name)"
     if (haskey(term.properties, :type) || length(type) > 0) && kw.show_type
-        s *= length(type) > 0 ? "::$(type)`" : "::$(_print(term, :type, args...; kwargs...))"
+        s *= "::" * (length(type) > 0 ? type : _print(term, :type, args...; kwargs...))
     end
     s *= length(df) > 0 ? " = $(df)`" : "`"
     s *= ": $(_print(term, :description, args...; kwargs...))"
