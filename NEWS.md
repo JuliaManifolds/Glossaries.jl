@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- The `Keyword` formatter now wraps the `default=` in its own code span when a custom `type=` string is given.
+- The `Keyword` formatter now keeps ` = default` inside the code span when a custom `type=` string is given, matching the documented `` `name::type = default` `` format.
 
 ## [0.1.1] January 14, 2026
 

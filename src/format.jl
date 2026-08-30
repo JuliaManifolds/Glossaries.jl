@@ -256,20 +256,10 @@ function (kw::Keyword)(term::Term, args...; default = "", name = "", type = "", 
     name = length(name) > 0 ? name : get(term.properties, :name, "")
     df = length(default) > 0 ? default : _print(term, :default, args...; kwargs...)
     s = "- `$(name)"
-    closed = false # a custom `type` closes the code span itself
     if (haskey(term.properties, :type) || length(type) > 0) && kw.show_type
-        if length(type) > 0
-            s *= "::$(type)`"
-            closed = true
-        else
-            s *= "::$(_print(term, :type, args...; kwargs...))"
-        end
+        s *= "::" * (length(type) > 0 ? type : _print(term, :type, args...; kwargs...))
     end
-    if closed
-        (length(df) > 0) && (s *= " = `$(df)`")
-    else
-        s *= length(df) > 0 ? " = $(df)`" : "`"
-    end
+    s *= length(df) > 0 ? " = $(df)`" : "`"
     s *= ": $(_print(term, :description, args...; kwargs...))"
     for p in add_properties
         if haskey(term.properties, p)
