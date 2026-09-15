@@ -7,3 +7,4 @@ Glossaries = {path = ".."}
 
 [compat]
 Glossaries = "0.1.0"
+Test = "< 0.0.1, 1"
